@@ -1,0 +1,12 @@
+{
+  "conventionalCommits.scopes": [
+    "Authentication",
+    "database",
+    "toast",
+    "dashboard",
+    "deployment",
+    "home",
+    "readme",
+    "Initialization"
+  ]
+}
