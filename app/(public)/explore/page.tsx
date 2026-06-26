@@ -21,26 +21,34 @@ export default function ExplorePage() {
   const itemsPerPage = 6;
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  // Fetch Data on Mount using toast.promise
+  // Fetch Data on Mount
   useEffect(() => {
+    let isMounted = true;
+
     const fetchServices = async () => {
-      const res = await fetch("/api/services");
-      if (!res.ok) throw new Error("Failed to load data");
-      return res.json();
+      try {
+        const res = await fetch("/api/services");
+        if (!res.ok) throw new Error("Failed to load data");
+        const data = await res.json();
+
+        if (isMounted) {
+          setServicesData(data);
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error("Error fetching services:", error);
+        if (isMounted) {
+          setIsLoading(false);
+          toast.error("Failed to load services");
+        }
+      }
     };
 
-    toast.promise(fetchServices(), {
-      loading: "Loading services...",
-      success: (data) => {
-        setServicesData(data);
-        setIsLoading(false);
-        return "Services loaded successfully!";
-      },
-      error: (err) => {
-        setIsLoading(false);
-        return "Error fetching services";
-      },
-    });
+    fetchServices();
+
+    return () => {
+      isMounted = false; // Prevents state updates if component unmounts quickly
+    };
   }, []);
 
   // Dynamic Categories extraction

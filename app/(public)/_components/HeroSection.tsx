@@ -60,7 +60,7 @@ const HeroSection = () => {
           />
 
           {/* Floating badge to match template vibes */}
-          <div className="py-4 px-8 absolute md:-bottom-20 bottom-10 -left-5 bg-base-100  rounded-xl shadow-xl border border-base-300 flex items-center gap-3">
+          <div className="py-4 px-8 absolute md:-bottom-15 bottom-10 -left-5 bg-base-100  rounded-xl shadow-xl border border-base-300 flex items-center gap-3">
             <div className="md:w-14 md:h-14 w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-600 md:text-2xl text-lg">
               <IoRibbonOutline />
             </div>

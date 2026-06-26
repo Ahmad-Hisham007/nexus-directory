@@ -25,13 +25,16 @@ interface newUserData {
 }
 
 const postFormData = async (formData: FormInputs): Promise<newUserData> => {
-  const response = await fetch("http://localhost:3000/api/register", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      ...formData,
-    }),
-  });
+  const response = await fetch(
+    "https://nexus-directory-five.vercel.app/api/register",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        ...formData,
+      }),
+    },
+  );
   const data = await response.json();
   return data;
 };

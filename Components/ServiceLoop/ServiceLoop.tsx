@@ -8,6 +8,7 @@ export interface ServiceType {
   description: string;
   category?: string;
   author: string;
+  image: string;
   rating: number | string;
   reviews: number;
   price: number | string;
@@ -20,7 +21,7 @@ const ServiceCard = ({ service }: { service: ServiceType }) => {
       {/* Thumbnail */}
       <div className="relative w-full h-48 bg-base-200 overflow-hidden">
         <Image
-          src="/Hero-image.webp"
+          src={service.image}
           alt={service.title}
           fill
           className="object-cover group-hover:scale-105 transition-transform duration-500"
