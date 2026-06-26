@@ -94,7 +94,7 @@ export default async function ServiceDetailsPage({
             {/* Image Gallery */}
             <div className="relative w-full h-100 lg:h-125 bg-base-200 rounded-3xl overflow-hidden border border-base-300">
               <Image
-                src="/Hero-image.webp"
+                src={service.image}
                 alt={service.title}
                 fill
                 className="object-cover"
