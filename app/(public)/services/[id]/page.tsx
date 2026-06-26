@@ -11,7 +11,8 @@ import { notFound } from "next/navigation";
 import ServiceCard from "@/Components/ServiceLoop/ServiceLoop";
 import { dbConnect } from "@/lib/dbConnect";
 import Service from "@/models/Service";
-
+import "@/models/User";
+import "@/models/Category";
 export default async function ServiceDetailsPage({
   params,
 }: {
