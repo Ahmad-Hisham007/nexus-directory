@@ -1,56 +1,26 @@
-import ServiceCard from "@/Components/ServiceLoop/ServiceLoop";
-import Image from "next/image";
+import ServiceCard, { ServiceType } from "@/Components/ServiceLoop/ServiceLoop";
 import Link from "next/link";
-import { FiStar, FiClock } from "react-icons/fi";
+import { dbConnect } from "@/lib/dbConnect";
+import Service from "@/models/Service";
+import "@/models/Category"; // Register models
+import "@/models/User";
 
-const TrendingServices = () => {
-  // Hardcoded MVP data. No lorem ipsum as per requirements.
-  const services = [
-    {
-      id: 1,
-      title: "Full-Stack Web Development",
-      description:
-        "Custom built, responsive, and SEO-optimized web applications using Next.js.",
-      author: "Alex Morgan",
-      rating: "4.9",
-      reviews: 124,
-      price: "$500+",
-      delivery: "7 days",
-    },
-    {
-      id: 2,
-      title: "Brand Identity & Logo Design",
-      description:
-        "Professional and modern brand identity packages including logos and guidelines.",
-      author: "Sarah Chen",
-      rating: "5.0",
-      reviews: 89,
-      price: "$250+",
-      delivery: "3 days",
-    },
-    {
-      id: 3,
-      title: "Advanced Technical SEO",
-      description:
-        "Comprehensive site audits, keyword strategies, and indexing optimization.",
-      author: "David Kumar",
-      rating: "4.8",
-      reviews: 210,
-      price: "$300+",
-      delivery: "5 days",
-    },
-    {
-      id: 4,
-      title: "UI/UX Mobile App Design",
-      description:
-        "High-fidelity Figma prototypes and user flows for iOS and Android applications.",
-      author: "Elena Rodriguez",
-      rating: "4.9",
-      reviews: 156,
-      price: "$400+",
-      delivery: "10 days",
-    },
-  ];
+const TrendingServices = async () => {
+  await dbConnect();
+
+  const servicesDoc = await Service.find()
+    .populate("author", "name image")
+    .populate("category", "name")
+    .limit(4)
+    .lean();
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const services: ServiceType[] = servicesDoc.map((s: any) => ({
+    ...s,
+    id: s._id.toString(),
+    author: s.author?.name || "Unknown Author",
+    category: s.category?.name || "Uncategorized",
+  }));
 
   return (
     <section className="w-full bg-base-100 py-20 px-6">
@@ -72,12 +42,17 @@ const TrendingServices = () => {
           </Link>
         </div>
 
-        {/* Desktop: 4 per row, matching requirements */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {services.map((service) => (
-            <ServiceCard service={service} key={service.id} />
-          ))}
-        </div>
+        {services.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {services.map((service) => (
+              <ServiceCard service={service} key={service.id} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-10 text-base-content/60">
+            No services available.
+          </div>
+        )}
       </div>
     </section>
   );
