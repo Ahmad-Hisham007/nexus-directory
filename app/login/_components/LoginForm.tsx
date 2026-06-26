@@ -44,6 +44,24 @@ const LoginForm = () => {
     }
   };
 
+  // Demo Login Handler
+
+  const handleDemoLogin = (role: "user" | "admin") => {
+    const email = role === "admin" ? "admin@demo.com" : "user@demo.com";
+    const password = "password123";
+
+    toast.promise(signIn("credentials", { email, password, redirect: false }), {
+      loading: `Logging in as ${role}...`,
+      success: (res) => {
+        if (res?.error) throw new Error(res.error);
+        router.push("/dashboard");
+        router.refresh();
+        return `Logged in as ${role}!`;
+      },
+      error: "Demo login failed. Did you create the DB users?",
+    });
+  };
+
   return (
     <form
       className="h-auto w-full text-center space-y-4 inline-block [&_label]:w-full"
@@ -93,6 +111,23 @@ const LoginForm = () => {
       >
         Login
       </button>
+      {/* NEW: Demo Login Buttons */}
+      <div className="flex gap-2 w-full mt-2">
+        <button
+          type="button"
+          onClick={() => handleDemoLogin("user")}
+          className="btn btn-outline btn-primary btn-sm flex-1"
+        >
+          Demo User
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDemoLogin("admin")}
+          className="btn btn-outline btn-secondary btn-sm flex-1"
+        >
+          Demo Admin
+        </button>
+      </div>
     </form>
   );
 };

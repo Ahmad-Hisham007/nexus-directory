@@ -1,0 +1,1916 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+.gitignore
+app/api/auth/[...nextauth]/route.ts
+app/api/register/route.ts
+app/api/test-db/route.ts
+app/dashboard/_components/DashboardLayoutUi.tsx
+app/dashboard/_components/DashboardSidebarToggle.tsx
+app/dashboard/_components/PageTitle.tsx
+app/dashboard/_components/UserProfile.tsx
+app/dashboard/layout.tsx
+app/dashboard/page.tsx
+app/dashboard/posts/add/page.tsx
+app/dashboard/posts/categories/page.tsx
+app/dashboard/posts/page.tsx
+app/dashboard/profile/page.tsx
+app/dashboard/settings/page.tsx
+app/favico.ico
+app/globals.css
+app/layout.tsx
+app/login/_components/Container.tsx
+app/login/_components/LoginForm.tsx
+app/login/_components/SignupForm.tsx
+app/login/page.tsx
+app/page.tsx
+auth.config.ts
+auth.ts
+Components/NavLink/NavLink.jsx
+Components/SessionWrapper/SessionWrapper.tsx
+Components/ToasterProvider.tsx
+eslint.config.mjs
+lib/dbConnect.ts
+models/Account.ts
+models/Session.ts
+models/User.ts
+next-auth.d.ts
+next.config.ts
+package.json
+postcss.config.mjs
+proxy.ts
+public/dark-bg.jpg
+public/file.svg
+public/globe.svg
+public/light-bg.jpg
+public/logo.jpg
+public/next.svg
+public/nextjs-13.svg
+public/nexus-directory-favico.png
+public/nexus-directory-logo.png
+public/vercel.svg
+public/window.svg
+README.md
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="next-auth.d.ts">
+import { DefaultSession } from "next-auth";
+
+declare module "next-auth" {
+  interface Session {
+    user: {
+      role: string;
+    } & DefaultSession["user"];
+  }
+  interface User {
+    role?: string;
+  }
+}
+</file>
+
+<file path=".gitignore">
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+</file>
+
+<file path="app/api/auth/[...nextauth]/route.ts">
+import { handlers } from "@/auth";
+export const { GET, POST } = handlers;
+</file>
+
+<file path="app/api/register/route.ts">
+import { dbConnect } from "@/lib/dbConnect";
+import User from "@/models/User";
+import bcrypt from "bcryptjs";
+import { NextResponse } from "next/server";
+
+const salt = bcrypt.genSaltSync(10);
+
+export const POST = async (req: Request) => {
+  try {
+    const { name, email, password, phoneNumber } = await req.json();
+    await dbConnect();
+    const existingUser = await User.findOne({ email: email });
+    if (existingUser) {
+      return NextResponse.json({
+        status: 400,
+        message: "The user is already existing",
+      });
+    }
+    const hashedPassword = bcrypt.hashSync(password, salt);
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random&color=fff`;
+    const newUser = {
+      name,
+      email,
+      password: hashedPassword,
+      phoneNumber,
+      image: avatarUrl,
+    };
+    const createdUser = await User.create(newUser);
+    return NextResponse.json({
+      status: 201,
+      data: createdUser,
+      message: "user created successfully",
+    });
+  } catch (error) {
+    return NextResponse.json({
+      status: 500,
+      message: `A critical error ocurred. Error: ${error}`,
+    });
+  }
+};
+</file>
+
+<file path="app/api/test-db/route.ts">
+import { dbConnect } from "@/lib/dbConnect";
+import { NextResponse } from "next/server";
+import mongoose from "mongoose";
+
+export async function GET() {
+  try {
+    await dbConnect();
+    const isConnected = mongoose.connection.readyState === 1;
+    if (isConnected) {
+      const dbName = mongoose.connection.name;
+      return NextResponse.json({
+        message: `${dbName} Successfully connected to MongoDB!`,
+      });
+    }
+  } catch (error) {
+    console.error("Database connection error:", error);
+    return NextResponse.json(
+      { message: "Failed to connect to database" },
+      { status: 500 },
+    );
+  }
+}
+</file>
+
+<file path="app/dashboard/_components/DashboardLayoutUi.tsx">
+import Image from "next/image";
+import React from "react";
+import {
+  TbLayoutSidebarRightCollapse,
+  TbLayoutSidebarRightExpand,
+} from "react-icons/tb";
+import DashboardSidebarToggle from "./DashboardSidebarToggle";
+import NavLink from "../../../Components/NavLink/NavLink";
+import { MdOutlineSpaceDashboard } from "react-icons/md";
+import { GrLayer } from "react-icons/gr";
+import { PiGearBold } from "react-icons/pi";
+import UserProfile from "./UserProfile";
+
+const DashboardLayoutUi = ({ children }: { children: React.ReactNode }) => {
+  return (
+    <div className="drawer lg:drawer-open">
+      {/* <input id="drawer-dashboard" type="checkbox" className="drawer-toggle" /> */}
+      <DashboardSidebarToggle></DashboardSidebarToggle>
+      <div className="drawer-content">
+        {/* Navbar */}
+        <nav className="navbar w-full bg-slate-700 border border-slate-500 md:flex justify-end grid grid-cols-[50px_auto_50px]">
+          <label
+            htmlFor="drawer-dashboard"
+            aria-label="open sidebar"
+            className="btn btn-square btn-ghost md:hidden flex items-center"
+          >
+            {/* Sidebar toggle icon */}
+            <TbLayoutSidebarRightCollapse className="my-1.5 text-slate-500 inline-block size-4 text-2xl w-6 h-6" />
+          </label>
+          <div className="px-4 flex items-end gap-3 md:hidden">
+            <Image
+              src="/nexus-directory-favico.png"
+              width="120"
+              height="50"
+              alt="dashboard-logo"
+              className="w-20"
+            ></Image>
+            <span className="leading-none font-semibold">Dashboard</span>
+          </div>
+          <UserProfile></UserProfile>
+        </nav>
+        {/* Page content here */}
+        <div className="p-4 bg-slate-900 min-h-screen p-10">{children}</div>
+      </div>
+
+      <div className="drawer-side is-drawer-close:overflow-visible border-slate-500 bg-slate-700">
+        <label
+          htmlFor="drawer-dashboard"
+          aria-label="close sidebar"
+          className="drawer-overlay"
+        ></label>
+        <div className="flex min-h-full flex-col items-start border is-drawer-close:w-14 is-drawer-open:w-64 border-slate-500 bg-slate-700">
+          {/* Sidebar content here */}
+          <div className="px-2 py-0 border-b border-slate-500 w-full">
+            <button
+              className="is-drawer-close:tooltip cursor-pointer is-drawer-close:tooltip-right flex items-center  is-drawer-open:py-5 is-drawer-open:px-4 is-drawer-close:py-4"
+              data-tip="Homepage"
+            >
+              <Image
+                src="/nexus-directory-favico.png"
+                width="120"
+                height="50"
+                alt="dashboard-logo"
+                className="is-drawer-open:w-20 is-drawer-close:10"
+              ></Image>
+              <span className="is-drawer-close:hidden">Dashboard</span>
+            </button>
+          </div>
+          <ul className="menu px-0 w-full grow [&_li]:rounded-0 [&_li]:border-b [&_li]:border-slate-500 text-slate-400 font-medium [&_a.active]:bg-black/20">
+            {/* List item */}
+            <li>
+              <NavLink
+                href="/dashboard"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Homepage"
+              >
+                <MdOutlineSpaceDashboard className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Dashboard</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                href="/dashboard/posts"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Posts"
+              >
+                <GrLayer className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Posts</span>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                href="/dashboard/settings"
+                className="is-drawer-close:tooltip is-drawer-close:tooltip-right"
+                data-tip="Settings"
+              >
+                <PiGearBold className="my-1.5 inline-block size-4" />
+                <span className="is-drawer-close:hidden">Settings</span>
+              </NavLink>
+            </li>
+          </ul>
+          <div className="flex justify-start items-center w-full p-2">
+            <label
+              htmlFor="drawer-dashboard"
+              aria-label="open sidebar"
+              className="btn btn-square bg-slate-500 grow box-border flex is-drawer-open:flex-row-reverse justify-between items-center border-0 p-3 is-drawer-close:tooltip is-drawer-close:tooltip-right"
+              data-tip="Open sidebar"
+            >
+              {/* Sidebar toggle icon */}
+              <TbLayoutSidebarRightCollapse className="my-1.5 inline-block size-4 is-drawer-open:hidden" />
+              <TbLayoutSidebarRightExpand className="my-1.5 inline-block size-4 is-drawer-close:hidden" />
+              <span className="is-drawer-close:hidden">Close sidebar</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default DashboardLayoutUi;
+</file>
+
+<file path="app/dashboard/_components/DashboardSidebarToggle.tsx">
+"use client";
+import { usePathname } from "next/navigation";
+import React, { useEffect, useState } from "react";
+
+const DashboardSidebarToggle = () => {
+  const [isDrawerOpen, setIsDrawerOpen] = useState<boolean>(true);
+  const pathname = usePathname();
+
+  useEffect(() => {
+    const handleRouteChange = () => {
+      if (window.innerWidth < 1024) {
+        setIsDrawerOpen(false);
+      }
+    };
+
+    handleRouteChange();
+  }, [pathname]);
+
+  return (
+    <input
+      id="drawer-dashboard"
+      type="checkbox"
+      className="drawer-toggle"
+      checked={isDrawerOpen}
+      onChange={() => setIsDrawerOpen(!isDrawerOpen)}
+    />
+  );
+};
+
+export default DashboardSidebarToggle;
+</file>
+
+<file path="app/dashboard/_components/PageTitle.tsx">
+import React from "react";
+import { MdKeyboardArrowRight } from "react-icons/md";
+
+const PageTitle = ({ title }: { title: string }) => {
+  return (
+    <div className="flex gap-2 items-center font-semibold text-xl text-slate-300">
+      <MdKeyboardArrowRight />
+      <h2>{title}</h2>
+    </div>
+  );
+};
+
+export default PageTitle;
+</file>
+
+<file path="app/dashboard/_components/UserProfile.tsx">
+"use client";
+import NavLink from "@/Components/NavLink/NavLink";
+import { signOut, useSession } from "next-auth/react";
+import Image from "next/image";
+import React from "react";
+
+const UserProfile = () => {
+  const { data: session } = useSession();
+  const imageSrc = session?.user?.image;
+  if (!imageSrc) return null;
+
+  return (
+    <div>
+      <div className="">
+        <button
+          className="btn h-auto p-0 rounded-full shadow-none border border-slate-400"
+          popoverTarget="popover-1"
+          style={{ anchorName: "--anchor-1" } as React.CSSProperties}
+        >
+          <Image
+            src={imageSrc}
+            alt="user image"
+            width={35}
+            height={35}
+            className="rounded-full"
+          ></Image>
+        </button>
+
+        <ul
+          className="dropdown menu w-52 rounded-box bg-base-100 shadow-sm space-y-2"
+          popover="auto"
+          id="popover-1"
+          style={{ positionAnchor: "--anchor-1" } as React.CSSProperties}
+        >
+          <li>
+            <NavLink href="/dashboard/profile">Profile</NavLink>
+          </li>
+          <li>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100"
+            >
+              Sign Out
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
+export default UserProfile;
+</file>
+
+<file path="app/dashboard/layout.tsx">
+import { ToasterProvider } from "@/Components/ToasterProvider";
+import { Metadata } from "next";
+import "../globals.css";
+import { Geist, Geist_Mono } from "next/font/google";
+import DashboardLayoutUi from "./_components/DashboardLayoutUi";
+import SessionWrapper from "@/Components/SessionWrapper/SessionWrapper";
+
+export default function DashboardLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <>
+      <DashboardLayoutUi>
+        <SessionWrapper>{children}</SessionWrapper>
+      </DashboardLayoutUi>
+    </>
+  );
+}
+</file>
+
+<file path="app/dashboard/page.tsx">
+import React from "react";
+import PageTitle from "./_components/PageTitle";
+
+const dashboardPage = () => {
+  return (
+    <div>
+      <PageTitle title={"Dashboard"}></PageTitle>
+    </div>
+  );
+};
+
+export default dashboardPage;
+</file>
+
+<file path="app/dashboard/posts/add/page.tsx">
+import React from "react";
+
+const addPostPage = () => {
+  return <div></div>;
+};
+
+export default addPostPage;
+</file>
+
+<file path="app/dashboard/posts/categories/page.tsx">
+import React from "react";
+
+const postCategoryPage = () => {
+  return <div>Post Categories</div>;
+};
+
+export default postCategoryPage;
+</file>
+
+<file path="app/dashboard/posts/page.tsx">
+import React from "react";
+import PageTitle from "../_components/PageTitle";
+
+const postsPage = () => {
+  return (
+    <div>
+      <PageTitle title={"Posts"}></PageTitle>
+    </div>
+  );
+};
+
+export default postsPage;
+</file>
+
+<file path="app/dashboard/profile/page.tsx">
+import React from "react";
+import PageTitle from "../_components/PageTitle";
+import { auth } from "@/auth";
+
+const profilePage = async () => {
+  const session = await auth();
+  return (
+    <div>
+      <PageTitle title="Profile Page"></PageTitle>
+      <h3 className="text-white mt-10">Hello! {session?.user?.name}</h3>
+    </div>
+  );
+};
+
+export default profilePage;
+</file>
+
+<file path="app/dashboard/settings/page.tsx">
+import React from "react";
+import PageTitle from "../_components/PageTitle";
+
+const settingsPage = () => {
+  return (
+    <div>
+      <PageTitle title={"Settings"}></PageTitle>
+    </div>
+  );
+};
+
+export default settingsPage;
+</file>
+
+<file path="app/globals.css">
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark;
+}
+
+@plugin "daisyui/theme" {
+  name: light;
+  default: true;
+  --color-primary: #26003b;
+  --color-secondary: #b71056;
+  --color-background: #bbc4c9;
+}
+
+@plugin "daisyui/theme" {
+  name: dark;
+  --color-primary: #c084fc;
+  --color-secondary: #f472b6;
+  --color-background: #0f172a;
+}
+/* @theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+} */
+</file>
+
+<file path="app/layout.tsx">
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { ToasterProvider } from "@/Components/ToasterProvider";
+import SessionWrapper from "@/Components/SessionWrapper/SessionWrapper";
+import { IoMdSunny } from "react-icons/io";
+import { FiMoon } from "react-icons/fi";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Next Js Authentication System",
+  description: "Built with love",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col bg-base-100 text-base-content transition-colors duration-300">
+        <ToasterProvider />
+        <SessionWrapper>{children}</SessionWrapper>
+        {/* Floating Theme Toggle */}
+        <div className="fixed bottom-6 right-6 z-50">
+          <label className="swap swap-rotate btn btn-circle btn-primary shadow-lg">
+            <input type="checkbox" className="theme-controller" value="dark" />
+            {/* sun icon */}
+            <IoMdSunny className="swap-off fill-current w-6 h-6" />
+            {/* moon icon */}
+            <FiMoon className="swap-on fill-current w-6 h-6" />
+          </label>
+        </div>
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="app/login/_components/Container.tsx">
+"use client";
+import { FaFacebookF, FaGithub, FaGoogle, FaLinkedinIn } from "react-icons/fa";
+import LoginForm from "./LoginForm";
+import Image from "next/image";
+import { useState, useEffect, useRef } from "react";
+import SignupForm from "./SignupForm";
+import { signIn } from "next-auth/react";
+
+const Container = () => {
+  const [isLoginCol, setIsLoginCol] = useState<boolean>(true);
+  const formRef = useRef<HTMLDivElement>(null);
+  const [bannerH, setBannerH] = useState(0);
+  const bannerRef = useRef<HTMLDivElement>(null);
+  const [heightDiff, setHeightDiff] = useState(0);
+
+  useEffect(() => {
+    const calculateHeights = () => {
+      if (formRef.current && bannerRef.current) {
+        const fH = formRef.current.offsetHeight;
+        const bH = bannerRef.current.offsetHeight;
+        setBannerH(bH);
+        // Form theke Banner minus korle je extra space thake
+        setHeightDiff(fH - bH);
+      }
+    };
+
+    // Initial calculation
+    calculateHeights();
+
+    // Content load hote deri hole ba resize hole recalculated hobe
+    window.addEventListener("resize", calculateHeights);
+    return () => window.removeEventListener("resize", calculateHeights);
+  }, [isLoginCol]);
+
+  useEffect(() => {
+    if (window.innerWidth < 1024) {
+      formRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [isLoginCol]);
+  const handleSocialLogin = (provider: string) => {
+    signIn(provider, { callbackUrl: "/dashboard" });
+  };
+  return (
+    <div
+      className={`max-w-6xl mx-auto grow flex flex-col lg:flex-row items-stretch rounded-lg shadow-lg shadow-slate-950 h-auto md:overflow-hidden overflow-visible lg:min-h-150 relative ${isLoginCol ? "" : "!lg:mt-0"}`}
+      style={
+        !isLoginCol && typeof window !== "undefined" && window.innerWidth < 1024
+          ? {
+              marginTop: `-${heightDiff}px`,
+              marginBottom: `${heightDiff}px`,
+            }
+          : {}
+      }
+    >
+      {/* 1. Form Container (Desktop e strictly 50% width) */}
+      <div
+        ref={formRef}
+        className={`w-full lg:basis-1/2 flex flex-col justify-center items-center min-h-150 lg:h-auto transition-transform duration-700 
+          ${
+            isLoginCol
+              ? "translate-x-0 translate-y-0"
+              : "lg:translate-x-full translate-y-full lg:translate-y-0"
+          } 
+          z-30 relative`}
+      >
+        <div
+          className={`login w-full lg:px-20 absolute inset-0 flex flex-col items-center justify-center transition-all duration-700 
+            ${isLoginCol ? "opacity-100 z-20 blur-0" : "opacity-0 z-10 blur-md"} px-4`}
+          style={{
+            backgroundImage: "url('/light-bg.jpg')",
+            backgroundSize: "cover",
+          }}
+        >
+          <h2 className="text-3xl font-bold text-center pb-5">
+            Sign in to your account
+          </h2>
+          <div className="h-0.5 bg-linear-to-br from-primary to-secondary mb-5 w-18" />
+          <LoginForm />
+          <div className="divider my-7 text-sm font-bold uppercase">OR</div>
+          <div className="flex gap-2 [&_button]:cursor-pointer">
+            <button
+              className="rounded-full w-10 h-10 flex justify-center items-center bg-linear-to-br from-sky-800 to-slate-800 text-white hover:scale-110 transition-all"
+              onClick={() => handleSocialLogin("linkedin")}
+            >
+              <FaLinkedinIn />
+            </button>
+            <button
+              className="rounded-full w-10 h-10 flex justify-center items-center bg-linear-to-br from-gray-500 to-gray-900 text-white hover:scale-110 transition-all"
+              onClick={() => handleSocialLogin("github")}
+            >
+              <FaGithub />
+            </button>
+            <button
+              className="rounded-full w-10 h-10 flex justify-center items-center bg-[linear-gradient(140deg,yellow_25%,red_35%,green_50%,blue_70%)] text-white hover:scale-110 transition-all"
+              onClick={() => handleSocialLogin("google")}
+            >
+              <FaGoogle />
+            </button>
+          </div>
+        </div>
+
+        <div
+          className={`signup w-full lg:px-20 absolute inset-0 flex flex-col items-center justify-center transition-all duration-700 
+            ${!isLoginCol ? "opacity-100 z-20 blur-0" : "opacity-0 z-10 blur-md"} px-4`}
+          style={{
+            backgroundImage: "url('/light-bg.jpg')",
+            backgroundSize: "cover",
+          }}
+        >
+          <h2 className="text-3xl font-bold text-center pb-5">
+            Create a new account
+          </h2>
+          <div className="h-0.5 bg-linear-to-br from-primary to-secondary mb-5 w-18" />
+          <SignupForm />
+        </div>
+      </div>
+
+      {/* 2. Banner Container (Desktop e strictly 50% width) */}
+      <div
+        ref={bannerRef}
+        className={`w-full lg:basis-1/2 flex flex-col items-center justify-center gap-5 text-center min-h-100 lg:h-auto py-10 px-4 transition-transform duration-700 
+          ${
+            isLoginCol
+              ? "translate-x-0 translate-y-0"
+              : "lg:-translate-x-full -translate-y-full lg:translate-y-0"
+          } 
+          z-50`}
+        style={{
+          backgroundImage: 'url("/dark-bg.jpg")',
+          backgroundSize: "cover",
+        }}
+      >
+        <Image
+          width={120}
+          height={50}
+          alt="Next-Logo"
+          src={"/nexus-directory-logo.png"}
+        />
+        <h2 className="text-xl text-white font-bold">
+          Welcome to Next Authentication
+        </h2>
+        <p className="text-white px-5 lg:max-w-[80%] mx-auto">
+          This page is built on Next JS, TypeScript, Mongoose and Next Auth.
+        </p>
+        <button
+          className="border-0 px-15 btn btn-lg rounded-3xl bg-linear-to-br from-primary to-secondary text-white uppercase text-sm cursor-pointer"
+          onClick={() => setIsLoginCol(!isLoginCol)}
+        >
+          {isLoginCol ? "Sign up" : "Login"}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+export default Container;
+</file>
+
+<file path="app/login/_components/LoginForm.tsx">
+"use client";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { MdLockOutline, MdOutlineEmail } from "react-icons/md";
+type LoginFormInputs = {
+  email: string;
+  password: string;
+  rememberMeCheckBox: boolean;
+};
+const LoginForm = () => {
+  const { register, handleSubmit, reset } = useForm<LoginFormInputs>();
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const onSubmit = async (data: LoginFormInputs) => {
+    try {
+      toast.promise(
+        signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        }),
+        {
+          loading: "Logging in ",
+          success: (res) => {
+            if (res?.error) {
+              throw new Error(res.error);
+            }
+            reset();
+            router.push("/dashboard");
+            router.refresh();
+            return "Login Successful!";
+          },
+          error: (err) => {
+            return err.message || "Invalid Credentials!";
+          },
+        },
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Demo Login Handler
+
+  const handleDemoLogin = (role: "user" | "admin") => {
+    const email = role === "admin" ? "admin@demo.com" : "user@demo.com";
+    const password = "password123";
+
+    toast.promise(signIn("credentials", { email, password, redirect: false }), {
+      loading: `Logging in as ${role}...`,
+      success: (res) => {
+        if (res?.error) throw new Error(res.error);
+        router.push("/dashboard");
+        router.refresh();
+        return `Logged in as ${role}!`;
+      },
+      error: "Demo login failed. Did you create the DB users?",
+    });
+  };
+
+  return (
+    <form
+      className="h-auto w-full text-center space-y-4 inline-block [&_label]:w-full"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none">
+        <MdOutlineEmail className="opacity-50" />
+
+        <input
+          type="text"
+          {...register("email")}
+          className=" grow"
+          placeholder="Email address"
+        />
+      </label>
+      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none">
+        <MdLockOutline className="opacity-50" />
+        <input
+          type={showPassword ? "text" : "password"}
+          {...register("password", {
+            required: "Password is required",
+          })}
+          className="grow"
+          placeholder="Password"
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+        >
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
+        </button>
+      </label>
+      <div className="flex justify-between mb-4">
+        <label className="label text-sm">
+          <input
+            type="checkbox"
+            {...register("rememberMeCheckBox")}
+            className="checkbox checkbox-xs rounded-xs"
+          />
+          Remember me
+        </label>
+      </div>
+      <button
+        type="submit"
+        className="w-full btn border-0 btn-lg rounded-3xl bg-linear-to-br from-primary to-secondary text-white uppercase text-sm mt-4"
+      >
+        Login
+      </button>
+      {/* NEW: Demo Login Buttons */}
+      <div className="flex gap-2 w-full mt-2">
+        <button
+          type="button"
+          onClick={() => handleDemoLogin("user")}
+          className="btn btn-outline btn-primary btn-sm flex-1"
+        >
+          Demo User
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDemoLogin("admin")}
+          className="btn btn-outline btn-secondary btn-sm flex-1"
+        >
+          Demo Admin
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default LoginForm;
+</file>
+
+<file path="app/login/_components/SignupForm.tsx">
+import React, { useState } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { FaRegUser } from "react-icons/fa";
+import {
+  MdLockOutline,
+  MdOutlineEmail,
+  MdOutlinePhoneEnabled,
+} from "react-icons/md";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import toast from "react-hot-toast";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+
+type FormInputs = {
+  name: string;
+  phoneNumber: number;
+  email: string;
+  password: string;
+  confirmPassword: string;
+};
+
+interface newUserData {
+  status: number;
+  message: string;
+}
+
+const postFormData = async (formData: FormInputs): Promise<newUserData> => {
+  const response = await fetch("http://localhost:3000/api/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      ...formData,
+    }),
+  });
+  const data = await response.json();
+  return data;
+};
+
+const SignupForm = () => {
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword_2, setShowPassword_2] = useState(false);
+  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    reset,
+    control,
+    formState: { errors },
+  } = useForm<FormInputs>();
+  const password = useWatch({ control, name: "password" });
+  const onSubmit = async (data: FormInputs) => {
+    try {
+      toast.promise(postFormData(data), {
+        loading: "Creating account...",
+        success: (res: newUserData) => {
+          if (res.status === 200 || res.status === 201) {
+            handleLoginAfterSignup(data);
+            return `Success: ${res.message}`;
+          } else {
+            throw new Error(res.message);
+          }
+        },
+        error: (err) => {
+          console.log(err);
+          return err.message || "Could not register!";
+        },
+      });
+    } catch (err) {
+      console.error(err);
+    }
+
+    return data;
+  };
+
+  const handleLoginAfterSignup = async (data: FormInputs) => {
+    try {
+      toast.promise(
+        signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        }),
+        {
+          loading: "Logging in",
+          success: (res) => {
+            reset();
+            router.push("/dashboard");
+            router.refresh();
+            return "Logged in. Redirecting...";
+          },
+          error: (err) => {
+            console.log(err);
+            router.push("/login");
+            return "Login failed";
+          },
+        },
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  return (
+    <form
+      className="h-auto w-full text-center space-y-4 inline-block [&_label]:w-full"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none">
+        <FaRegUser className="opacity-50" />
+
+        <input
+          type="text"
+          {...register("name")}
+          className=" grow"
+          placeholder="E.g. John Smith"
+        />
+      </label>
+      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none">
+        <MdOutlinePhoneEnabled className="opacity-50" />
+
+        <input
+          type="text"
+          {...register("phoneNumber")}
+          className=" grow"
+          placeholder="+xx xxx xxxx"
+        />
+      </label>
+      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none">
+        <MdOutlineEmail className="opacity-50" />
+
+        <input
+          type="email"
+          {...register("email", {
+            required: "Email is required",
+            pattern: { value: /^\S+@\S+$/i, message: "Invalid email" },
+          })}
+          className=" grow"
+          placeholder="Email address"
+        />
+      </label>
+      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none relative">
+        <MdLockOutline className="opacity-50" />
+        <input
+          type={showPassword ? "text" : "password"}
+          {...register("password", {
+            required: "Password is required",
+          })}
+          className="grow"
+          placeholder="Password"
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+        >
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
+        </button>
+      </label>
+
+      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none relative">
+        <MdLockOutline className="opacity-50" />
+        <input
+          type={showPassword_2 ? "text" : "password"}
+          {...register("confirmPassword", {
+            required: "This field is required",
+            validate: (value) => value === password || "Passwords do not match",
+          })}
+          className="grow"
+          placeholder="Confirm Password"
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword_2(!showPassword_2)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 z-100"
+        >
+          {showPassword_2 ? <FaEyeSlash /> : <FaEye />}
+        </button>
+      </label>
+      {errors.confirmPassword && (
+        <p className="text-red-500 text-xs">{errors.confirmPassword.message}</p>
+      )}
+      <button
+        type="submit"
+        className="w-full btn border-0 btn-lg rounded-3xl bg-linear-to-br from-primary to-secondary text-white uppercase text-sm mt-4"
+      >
+        Signup
+      </button>
+    </form>
+  );
+};
+
+export default SignupForm;
+</file>
+
+<file path="app/login/page.tsx">
+import React from "react";
+import Container from "./_components/Container";
+
+const page = () => {
+  return (
+    <section className="bg-slate-900 min-h-screen py-25 flex items-stretch z-30">
+      <Container />
+    </section>
+  );
+};
+
+export default page;
+</file>
+
+<file path="app/page.tsx">
+import Image from "next/image";
+import Link from "next/link";
+
+export default function Home() {
+  return (
+    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-slate-300">
+      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-center gap-12 py-32 px-16 bg-white dark:bg-slate-900 sm:items-start">
+        <Image
+          className="dark:invert"
+          src="/nexus-directory-logo.png"
+          alt="Nexus Directory logo"
+          width={200}
+          height={50}
+          priority
+        />
+        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
+            This is a Next Js authentication template. Built with Next Js,
+            TypeScript, MongoDB, Mongoose,
+          </h1>
+          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
+            Looking for my portfolios? If you have an offer please feel free to
+            explore my{" "}
+            <a
+              href="https://www.linkedin.com/in/ahmad-hisham007"
+              className="font-medium text-zinc-950 dark:text-zinc-50"
+            >
+              Linkedin
+            </a>{" "}
+            or the{" "}
+            <a
+              href="https://www.fiverr.com/s/GzRj290"
+              className="font-medium text-zinc-950 dark:text-zinc-50"
+            >
+              Fiverr
+            </a>{" "}
+            profile.
+          </p>
+        </div>
+        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
+          <Link
+            className="flex h-12 w-full items-center justify-center gap-2 rounded-full px-5 text-background transition-colors bg-white hover:bg-white/80 md:w-[158px]"
+            href="/login"
+            rel="noopener noreferrer"
+          >
+            <Image
+              className="dark:invert"
+              src="/vercel.svg"
+              alt="Vercel logomark"
+              width={16}
+              height={16}
+            />
+            Sign In
+          </Link>
+          <a
+            className="flex h-12 w-full items-center justify-center rounded-full border border-solid  px-5 transition-colors hover:border-transparent border-white text-white md:w-39.5"
+            href="https://github.com/Ahmad-Hisham007"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Github
+          </a>
+        </div>
+        <div className="text-white/60 text-center text-2xl font-semibold">
+          Built With ❤
+        </div>
+      </main>
+    </div>
+  );
+}
+</file>
+
+<file path="auth.config.ts">
+import { NextAuthConfig } from "next-auth";
+import Google from "next-auth/providers/google";
+import GitHub from "next-auth/providers/github";
+import LinkedIn from "next-auth/providers/linkedin";
+export default {
+  providers: [
+    Google({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+    GitHub({
+      clientId: process.env.GITHUB_CLIENT_ID,
+      clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      checks: ["none"],
+    }),
+    LinkedIn({
+      clientId: process.env.LINKEDIN_CLIENT_ID,
+      clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
+      issuer: "https://www.linkedin.com/oauth",
+      client: {
+        id_token_signed_response_alg: "RS256",
+      },
+      authorization: {
+        params: { scope: "openid profile email" }, // Scope গুলো ঠিকঠাক দিন
+      },
+      wellKnown:
+        "https://www.linkedin.com/oauth/.well-known/openid-configuration",
+      jwks_endpoint: "https://www.linkedin.com/oauth/openid/jwks",
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+        };
+      },
+    }),
+  ],
+} satisfies NextAuthConfig;
+</file>
+
+<file path="auth.ts">
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import authConfig from "./auth.config";
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+  providers: [
+    ...authConfig.providers,
+    CredentialsProvider({
+      credentials: {
+        email: { label: "email", type: "email" },
+        password: { label: "password", type: "password" },
+      },
+      async authorize(credentials) {
+        const { dbConnect } = await import("./lib/dbConnect");
+        const User = (await import("./models/User")).default;
+        if (!credentials?.email || !credentials?.password) return null;
+        await dbConnect();
+        const user = await User.findOne({ email: credentials?.email }).select(
+          "+password",
+        );
+        if (!user) {
+          throw new Error("No user found with this email");
+        }
+        const isPasswordCorrect = bcrypt.compareSync(
+          credentials?.password as string,
+          user.password,
+        );
+        if (!isPasswordCorrect) {
+          throw new Error("Password is Incorrect");
+        }
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.name,
+          phoneNumber: user.phoneNumber,
+          image: user.image,
+          role: user.role,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.role = token.role as string;
+      }
+      return session;
+    },
+  },
+  secret: process.env.AUTH_SECRET,
+  session: { strategy: "jwt" },
+  pages: {
+    signIn: "/login",
+  },
+});
+</file>
+
+<file path="Components/NavLink/NavLink.jsx">
+"use client"
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import React from 'react';
+
+const NavLink = ({ href, children, className = '' }) => {
+    const pathname = usePathname();
+    const isActive = href === pathname;
+    const combinedClasses = `${className} ${isActive ? 'active' : ''}`.trim();
+    return (
+        <Link href={href} className={combinedClasses}>{children}</Link>
+    );
+};
+
+export default NavLink;
+</file>
+
+<file path="Components/SessionWrapper/SessionWrapper.tsx">
+"use client";
+import { SessionProvider } from "next-auth/react";
+
+const SessionWrapper = ({ children }: { children: React.ReactNode }) => {
+  return <SessionProvider>{children}</SessionProvider>;
+};
+
+export default SessionWrapper;
+</file>
+
+<file path="Components/ToasterProvider.tsx">
+"use client";
+
+import { Toaster } from "react-hot-toast";
+
+export const ToasterProvider = () => {
+  return (
+    <Toaster
+      position="top-center"
+      reverseOrder={false}
+      toastOptions={{
+        duration: 3000,
+        style: {
+          background: "#363636",
+          color: "#fff",
+        },
+      }}
+    />
+  );
+};
+</file>
+
+<file path="eslint.config.mjs">
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTs from "eslint-config-next/typescript";
+
+const eslintConfig = defineConfig([
+  ...nextVitals,
+  ...nextTs,
+  // Override default ignores of eslint-config-next.
+  globalIgnores([
+    // Default ignores of eslint-config-next:
+    ".next/**",
+    "out/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
+]);
+
+export default eslintConfig;
+</file>
+
+<file path="lib/dbConnect.ts">
+// import { MongoClient } from "mongodb";
+
+// if (!process.env.MONGODB_URI) {
+//   throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
+// }
+
+// const mongoDBUri: string = process.env.MONGODB_URI;
+
+// const options = {};
+
+// let client: MongoClient;
+
+// const globalWithMongo = global as typeof globalThis & {
+//   _mongoClientPromise: Promise<MongoClient>;
+// };
+// if (!globalWithMongo._mongoClientPromise) {
+//   client = new MongoClient(mongoDBUri, options);
+//   globalWithMongo._mongoClientPromise = client.connect();
+// }
+// const clientPromise: Promise<MongoClient> = globalWithMongo._mongoClientPromise;
+
+// export default clientPromise;
+
+// For Mongoose
+import mongoose, { Mongoose } from "mongoose";
+if (!process.env.MONGODB_URI) {
+  throw new Error('Invalid/Missing environment variable: "MONGODB_URI"');
+}
+const mongoDBUri: string = process.env.MONGODB_URI;
+
+interface GlobalMongoose {
+  mongoose: {
+    conn: Mongoose | null;
+    promise: Promise<Mongoose> | null;
+  };
+}
+
+declare global {
+  var mongoose: GlobalMongoose["mongoose"];
+}
+
+let cached = global.mongoose;
+
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+export const dbConnect = async (): Promise<Mongoose> => {
+  if (cached.conn) {
+    return cached.conn;
+  }
+
+  if (!cached.promise) {
+    const opt = {
+      bufferCommands: false,
+      dbName: "nexus-directory",
+    };
+    cached.promise = mongoose.connect(mongoDBUri, opt).then((m) => {
+      return m;
+    });
+  }
+
+  try {
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+  return cached.conn;
+};
+</file>
+
+<file path="models/Account.ts">
+import mongoose from "mongoose";
+
+const accountSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  type: { type: String, required: true },
+  provider: { type: String, required: true },
+  providerAccountId: { type: String, required: true },
+  refresh_token: { type: String },
+  access_token: { type: String },
+  expires_at: { type: Number },
+  token_type: { type: String },
+  scope: { type: String },
+  id_token: { type: String },
+  session_state: { type: String },
+});
+
+export const Account =
+  mongoose.models.Account || mongoose.model("Account", accountSchema);
+</file>
+
+<file path="models/Session.ts">
+import mongoose from "mongoose";
+
+const sessionSchema = new mongoose.Schema({
+  sessionToken: { type: String, unique: true, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  expires: { type: Date, required: true },
+});
+
+export const Session =
+  mongoose.models.Session || mongoose.model("Session", sessionSchema);
+</file>
+
+<file path="models/User.ts">
+import mongoose from "mongoose";
+
+const UsersSchema = new mongoose.Schema({
+  name: { type: String },
+  phoneNumber: { type: Number },
+  email: { type: String, unique: true, required: true },
+  emailVerified: { type: Date, default: null },
+  image: { type: String },
+  // Extra fields
+  password: { type: String, select: false },
+  role: { type: String, default: "user" },
+});
+const User = mongoose.models.User || mongoose.model("User", UsersSchema);
+
+export default User;
+</file>
+
+<file path="next.config.ts">
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+        port: "",
+        pathname: "/api/**",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "media.licdn.com",
+        port: "",
+        pathname: "/dms/image/**",
+      },
+    ],
+  },
+};
+
+export default nextConfig;
+</file>
+
+<file path="package.json">
+{
+  "name": "nexus-directory",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
+    "daisyui": "^5.5.19",
+    "dotenv": "^17.4.2",
+    "mongodb": "^7.2.0",
+    "mongoose": "^9.5.0",
+    "next": "16.2.4",
+    "next-auth": "^5.0.0-beta.31",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "react-hook-form": "^7.73.1",
+    "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.4",
+    "tailwindcss": "^4",
+    "typescript": "^5"
+  }
+}
+</file>
+
+<file path="postcss.config.mjs">
+const config = {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  },
+};
+
+export default config;
+</file>
+
+<file path="proxy.ts">
+import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
+import authConfig from "./auth.config";
+
+const { auth } = NextAuth(authConfig);
+export default auth((req) => {
+  const isLoggedIn = !!req.auth;
+  const isDashboard = req.nextUrl.pathname.startsWith("/dashboard");
+  if (isDashboard && !isLoggedIn) {
+    return NextResponse.redirect(new URL("/login", req.url));
+  }
+  return NextResponse.next();
+});
+
+export const config = {
+  matcher: ["/dashboard/:path*"],
+};
+</file>
+
+<file path="public/file.svg">
+<svg fill="none" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><path d="M14.5 13.5V5.41a1 1 0 0 0-.3-.7L9.8.29A1 1 0 0 0 9.08 0H1.5v13.5A2.5 2.5 0 0 0 4 16h8a2.5 2.5 0 0 0 2.5-2.5m-1.5 0v-7H8v-5H3v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1M9.5 5V2.12L12.38 5zM5.13 5h-.62v1.25h2.12V5zm-.62 3h7.12v1.25H4.5zm.62 3h-.62v1.25h7.12V11z" clip-rule="evenodd" fill="#666" fill-rule="evenodd"/></svg>
+</file>
+
+<file path="public/globe.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><g clip-path="url(#a)"><path fill-rule="evenodd" clip-rule="evenodd" d="M10.27 14.1a6.5 6.5 0 0 0 3.67-3.45q-1.24.21-2.7.34-.31 1.83-.97 3.1M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16m.48-1.52a7 7 0 0 1-.96 0H7.5a4 4 0 0 1-.84-1.32q-.38-.89-.63-2.08a40 40 0 0 0 3.92 0q-.25 1.2-.63 2.08a4 4 0 0 1-.84 1.31zm2.94-4.76q1.66-.15 2.95-.43a7 7 0 0 0 0-2.58q-1.3-.27-2.95-.43a18 18 0 0 1 0 3.44m-1.27-3.54a17 17 0 0 1 0 3.64 39 39 0 0 1-4.3 0 17 17 0 0 1 0-3.64 39 39 0 0 1 4.3 0m1.1-1.17q1.45.13 2.69.34a6.5 6.5 0 0 0-3.67-3.44q.65 1.26.98 3.1M8.48 1.5l.01.02q.41.37.84 1.31.38.89.63 2.08a40 40 0 0 0-3.92 0q.25-1.2.63-2.08a4 4 0 0 1 .85-1.32 7 7 0 0 1 .96 0m-2.75.4a6.5 6.5 0 0 0-3.67 3.44 29 29 0 0 1 2.7-.34q.31-1.83.97-3.1M4.58 6.28q-1.66.16-2.95.43a7 7 0 0 0 0 2.58q1.3.27 2.95.43a18 18 0 0 1 0-3.44m.17 4.71q-1.45-.12-2.69-.34a6.5 6.5 0 0 0 3.67 3.44q-.65-1.27-.98-3.1" fill="#666"/></g><defs><clipPath id="a"><path fill="#fff" d="M0 0h16v16H0z"/></clipPath></defs></svg>
+</file>
+
+<file path="public/next.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 394 80"><path fill="#000" d="M262 0h68.5v12.7h-27.2v66.6h-13.6V12.7H262V0ZM149 0v12.7H94v20.4h44.3v12.6H94v21h55v12.6H80.5V0h68.7zm34.3 0h-17.8l63.8 79.4h17.9l-32-39.7 32-39.6h-17.9l-23 28.6-23-28.6zm18.3 56.7-9-11-27.1 33.7h17.8l18.3-22.7z"/><path fill="#000" d="M81 79.3 17 0H0v79.3h13.6V17l50.2 62.3H81Zm252.6-.4c-1 0-1.8-.4-2.5-1s-1.1-1.6-1.1-2.6.3-1.8 1-2.5 1.6-1 2.6-1 1.8.3 2.5 1a3.4 3.4 0 0 1 .6 4.3 3.7 3.7 0 0 1-3 1.8zm23.2-33.5h6v23.3c0 2.1-.4 4-1.3 5.5a9.1 9.1 0 0 1-3.8 3.5c-1.6.8-3.5 1.3-5.7 1.3-2 0-3.7-.4-5.3-1s-2.8-1.8-3.7-3.2c-.9-1.3-1.4-3-1.4-5h6c.1.8.3 1.6.7 2.2s1 1.2 1.6 1.5c.7.4 1.5.5 2.4.5 1 0 1.8-.2 2.4-.6a4 4 0 0 0 1.6-1.8c.3-.8.5-1.8.5-3V45.5zm30.9 9.1a4.4 4.4 0 0 0-2-3.3 7.5 7.5 0 0 0-4.3-1.1c-1.3 0-2.4.2-3.3.5-.9.4-1.6 1-2 1.6a3.5 3.5 0 0 0-.3 4c.3.5.7.9 1.3 1.2l1.8 1 2 .5 3.2.8c1.3.3 2.5.7 3.7 1.2a13 13 0 0 1 3.2 1.8 8.1 8.1 0 0 1 3 6.5c0 2-.5 3.7-1.5 5.1a10 10 0 0 1-4.4 3.5c-1.8.8-4.1 1.2-6.8 1.2-2.6 0-4.9-.4-6.8-1.2-2-.8-3.4-2-4.5-3.5a10 10 0 0 1-1.7-5.6h6a5 5 0 0 0 3.5 4.6c1 .4 2.2.6 3.4.6 1.3 0 2.5-.2 3.5-.6 1-.4 1.8-1 2.4-1.7a4 4 0 0 0 .8-2.4c0-.9-.2-1.6-.7-2.2a11 11 0 0 0-2.1-1.4l-3.2-1-3.8-1c-2.8-.7-5-1.7-6.6-3.2a7.2 7.2 0 0 1-2.4-5.7 8 8 0 0 1 1.7-5 10 10 0 0 1 4.3-3.5c2-.8 4-1.2 6.4-1.2 2.3 0 4.4.4 6.2 1.2 1.8.8 3.2 2 4.3 3.4 1 1.4 1.5 3 1.5 5h-5.8z"/></svg>
+</file>
+
+<file path="public/nextjs-13.svg">
+<svg height="508" xmlns="http://www.w3.org/2000/svg" width="2500" viewBox="0 0 394.00000000000006 79.433"><path d="M261.919.033h68.628V12.7h-27.224v66.639H289.71V12.7h-27.791V.033zM149.052.033V12.7h-55.01v20.377h44.239v12.667H94.042v20.928h55.01V79.34H80.43V12.7h-.006V.033h68.628zM183.32.066h-17.814l63.806 79.306h17.866l-31.907-39.626L247.127.126l-17.815.028-22.96 28.516L183.32.066zM201.6 56.715l-8.921-11.092-27.224 33.81h17.865l18.28-22.718z" fill="var(--geist-foreground)"/><path clip-rule="evenodd" d="M80.907 79.339L17.015 0H0v79.306h13.612V16.952l50.195 62.387h17.1z" fill="var(--geist-foreground)" fill-rule="evenodd"/><path d="M333.607 78.855a3.528 3.528 0 0 1-2.555-1.036c-.71-.691-1.061-1.527-1.052-2.518-.009-.963.342-1.79 1.052-2.481a3.528 3.528 0 0 1 2.555-1.036c.959 0 1.798.345 2.508 1.036.72.69 1.079 1.518 1.089 2.481a3.44 3.44 0 0 1-.508 1.79 3.675 3.675 0 0 1-1.319 1.282 3.403 3.403 0 0 1-1.77.482zM356.84 45.445h6.032v23.24c-.009 2.135-.471 3.962-1.374 5.498-.913 1.536-2.177 2.708-3.8 3.535-1.614.818-3.505 1.237-5.654 1.237-1.965 0-3.726-.355-5.294-1.046-1.568-.69-2.813-1.726-3.726-3.09-.923-1.363-1.375-3.063-1.375-5.098h6.042c.009.89.212 1.663.599 2.308a3.855 3.855 0 0 0 1.605 1.481c.691.346 1.485.519 2.379.519.969 0 1.799-.2 2.472-.61.673-.4 1.19-1 1.55-1.799.35-.79.535-1.772.544-2.935v-23.24zM387.691 54.534c-.147-1.409-.793-2.509-1.918-3.29-1.135-.79-2.601-1.182-4.4-1.182-1.263 0-2.351.191-3.255.564-.904.382-1.605.89-2.085 1.536-.479.645-.719 1.381-.738 2.208 0 .691.166 1.29.489 1.79.323.51.756.937 1.319 1.282a8.806 8.806 0 0 0 1.845.882c.682.236 1.365.436 2.047.6l3.145.772a21.74 21.74 0 0 1 3.662 1.182 12.966 12.966 0 0 1 3.163 1.872 8.384 8.384 0 0 1 2.214 2.726c.544 1.064.821 2.309.821 3.745 0 1.936-.498 3.635-1.504 5.108-1.005 1.463-2.453 2.608-4.353 3.435-1.891.818-4.178 1.236-6.871 1.236-2.601 0-4.87-.4-6.779-1.2-1.918-.79-3.413-1.954-4.492-3.48-1.079-1.527-1.66-3.39-1.743-5.58h5.977c.083 1.144.452 2.099 1.079 2.871.636.763 1.466 1.327 2.481 1.709 1.024.372 2.167.563 3.431.563 1.319 0 2.481-.2 3.486-.59.996-.391 1.78-.937 2.343-1.646.572-.7.858-1.526.867-2.472-.009-.863-.268-1.581-.766-2.145-.507-.563-1.208-1.036-2.103-1.417a21.606 21.606 0 0 0-3.154-1.027l-3.818-.964c-2.758-.7-4.944-1.763-6.54-3.19-1.604-1.427-2.398-3.317-2.398-5.69 0-1.944.535-3.653 1.615-5.116 1.069-1.463 2.536-2.6 4.39-3.408 1.863-.818 3.966-1.218 6.308-1.218 2.38 0 4.464.4 6.263 1.218 1.798.809 3.21 1.936 4.233 3.372 1.024 1.436 1.559 3.08 1.587 4.944h-5.848z" fill="var(--geist-foreground)"/></svg>
+</file>
+
+<file path="public/vercel.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1155 1000"><path d="m577.3 0 577.4 1000H0z" fill="#fff"/></svg>
+</file>
+
+<file path="public/window.svg">
+<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" clip-rule="evenodd" d="M1.5 2.5h13v10a1 1 0 0 1-1 1h-11a1 1 0 0 1-1-1zM0 1h16v11.5a2.5 2.5 0 0 1-2.5 2.5h-11A2.5 2.5 0 0 1 0 12.5zm3.75 4.5a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5M7 4.75a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0m1.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5" fill="#666"/></svg>
+</file>
+
+<file path="README.md">
+# Next Login Page
+
+A modern, full-stack authentication template built with Next.js, TypeScript, MongoDB, and NextAuth.js. This project provides a complete user authentication system with both traditional email/password login and OAuth integration (Google, GitHub, LinkedIn).
+
+## Features
+
+- **User Authentication**: Secure login and registration with email/password
+- **OAuth Integration**: Social login with Google, GitHub, and LinkedIn
+- **Dashboard**: Protected dashboard with sidebar navigation
+- **User Management**: User profiles, roles, and session management
+- **Responsive Design**: Mobile-first design using Tailwind CSS and DaisyUI
+- **Type Safety**: Full TypeScript support
+- **Database**: MongoDB with Mongoose ODM
+- **Form Handling**: React Hook Form with validation
+- **Notifications**: React Hot Toast for user feedback
+- **Modern UI**: Clean, professional interface with dark theme support
+
+## Tech Stack
+
+- **Frontend**: Next.js 16, React 19, TypeScript
+- **Styling**: Tailwind CSS, DaisyUI
+- **Authentication**: NextAuth.js v5
+- **Database**: MongoDB, Mongoose
+- **Forms**: React Hook Form
+- **Icons**: React Icons
+- **Notifications**: React Hot Toast
+- **Password Hashing**: bcryptjs
+
+## Project Structure
+
+```
+next-login-page/
+├── app/
+│   ├── api/
+│   │   ├── auth/[...nextauth]/route.ts    # NextAuth.js API route
+│   │   ├── register/route.ts              # User registration API
+│   │   └── test-db/route.ts               # Database connection test
+│   ├── dashboard/
+│   │   ├── _components/                   # Dashboard components
+│   │   ├── posts/                         # Posts management pages
+│   │   ├── profile/                       # User profile page
+│   │   ├── settings/                      # Settings page
+│   │   └── page.tsx                       # Dashboard home
+│   ├── login/
+│   │   ├── _components/                   # Login/signup components
+│   │   └── page.tsx                       # Login page
+│   ├── globals.css                        # Global styles
+│   ├── layout.tsx                         # Root layout
+│   └── page.tsx                           # Home page
+├── lib/
+│   └── dbConnect.ts                       # Database connection utility
+├── models/
+│   ├── User.ts                            # User model
+│   ├── Account.ts                         # NextAuth Account model
+│   └── Session.ts                         # NextAuth Session model
+├── Components/                            # Shared components
+├── auth.config.ts                         # NextAuth configuration
+├── auth.ts                                # NextAuth setup
+└── package.json
+```
+
+## Installation
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/Ahmad-Hisham007/next-login-page.git
+   cd next-login-page
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**:
+
+   Create a `.env.local` file in the root directory with the following variables:
+
+   ```env
+   # Database
+   MONGODB_URI=mongodb://localhost:27017/next-login-page
+
+   # NextAuth.js
+   AUTH_SECRET=your-secret-key-here
+   NEXTAUTH_URL=http://localhost:3000
+
+   # OAuth Providers
+   GOOGLE_CLIENT_ID=your-google-client-id
+   GOOGLE_CLIENT_SECRET=your-google-client-secret
+
+   GITHUB_CLIENT_ID=your-github-client-id
+   GITHUB_CLIENT_SECRET=your-github-client-secret
+
+   LINKEDIN_CLIENT_ID=your-linkedin-client-id
+   LINKEDIN_CLIENT_SECRET=your-linkedin-client-secret
+   ```
+
+   **Note**: For production, use a secure random string for `AUTH_SECRET`. You can generate one using:
+
+   ```bash
+   openssl rand -base64 32
+   ```
+
+4. **Set up MongoDB**:
+
+   Make sure MongoDB is running locally or use a cloud service like MongoDB Atlas. Update the `MONGODB_URI` accordingly.
+
+5. **Configure OAuth Apps**:
+   - **Google**: Create a project in [Google Cloud Console](https://console.cloud.google.com/), enable Google+ API, and create OAuth 2.0 credentials.
+   - **GitHub**: Go to [GitHub Developer Settings](https://github.com/settings/developers), create a new OAuth App.
+   - **LinkedIn**: Create an app in [LinkedIn Developer Network](https://developer.linkedin.com/).
+
+   Set the redirect URIs to: `http://localhost:3000/api/auth/callback/[provider]`
+
+## Usage
+
+1. **Start the development server**:
+
+   ```bash
+   npm run dev
+   ```
+
+2. **Open your browser** and navigate to `http://localhost:3000`
+
+3. **Register/Login**:
+   - Visit `/login` to create a new account or sign in
+   - Use email/password or social login options
+   - After successful authentication, you'll be redirected to the dashboard
+
+4. **Dashboard Features**:
+   - **Posts**: Manage your posts and categories
+   - **Profile**: View and edit your profile information
+   - **Settings**: Configure your account settings
+
+## API Endpoints
+
+### Authentication
+
+- `POST /api/auth/[...nextauth]` - NextAuth.js authentication routes
+- `POST /api/register` - User registration
+
+### Database
+
+- `GET /api/test-db` - Test database connection
+
+## User Model
+
+```typescript
+{
+  name: string;
+  phoneNumber: number;
+  email: string; // unique, required
+  emailVerified: Date | null;
+  image: string;
+  password: string; // hashed, not selected by default
+  role: string; // default: "user"
+}
+```
+
+## Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run start` - Start production server
+- `npm run lint` - Run ESLint
+
+## Deployment
+
+### Vercel (Recommended)
+
+1. Push your code to GitHub
+2. Connect your repository to Vercel
+3. Add environment variables in Vercel dashboard
+4. Deploy
+
+### Other Platforms
+
+Make sure to set all environment variables and ensure MongoDB connectivity.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit your changes: `git commit -am 'Add some feature'`
+4. Push to the branch: `git push origin feature/your-feature`
+5. Submit a pull request
+
+## Support
+
+If you found this template helpful, please consider:
+
+- Starring the repository
+- Sharing it with others
+- Checking out my portfolio: [LinkedIn](https://www.linkedin.com/in/ahmad-hisham007) | [Fiverr](https://www.fiverr.com/s/GzRj290)
+
+## Acknowledgments
+
+- [Next.js](https://nextjs.org/) - The React framework
+- [NextAuth.js](https://next-auth.js.org/) - Authentication library
+- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
+- [DaisyUI](https://daisyui.com/) - Component library for Tailwind CSS
+- [MongoDB](https://www.mongodb.com/) - NoSQL database
+- [Mongoose](https://mongoosejs.com/) - MongoDB ODM
+- [React Hook Form](https://react-hook-form.com/) - Form handling library
+- [React Icons](https://react-icons.github.io/react-icons/) - Icon library
+- [React Hot Toast](https://react-hot-toast.com/) - Notification library
+- [bcryptjs](https://www.npmjs.com/package/bcryptjs) - Password hashing library
+</file>
+
+<file path="tsconfig.json">
+{
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "exclude": ["node_modules"]
+}
+</file>
+
+</files>
