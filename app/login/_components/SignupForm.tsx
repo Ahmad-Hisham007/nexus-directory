@@ -181,7 +181,7 @@ const SignupForm = () => {
       )}
       <button
         type="submit"
-        className="w-full btn border-0 btn-lg rounded-3xl bg-linear-to-br from-primary to-secondary text-white uppercase text-sm mt-4"
+        className="w-full btn border-0 btn-lg rounded-3xl bg-linear-to-br from-[#26003b] to-[#b71056] text-white uppercase text-sm mt-4"
       >
         Signup
       </button>

@@ -7,7 +7,7 @@ const profilePage = async () => {
   return (
     <div>
       <PageTitle title="Profile Page"></PageTitle>
-      <h3 className="text-white mt-10">Hello! {session?.user?.name}</h3>
+      <h3 className="text-base-content mt-10">Hello! {session?.user?.name}</h3>
     </div>
   );
 };

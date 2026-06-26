@@ -42,7 +42,8 @@ const Container = () => {
   };
   return (
     <div
-      className={`max-w-6xl mx-auto grow flex flex-col lg:flex-row items-stretch rounded-lg shadow-lg shadow-slate-950 h-auto md:overflow-hidden overflow-visible lg:min-h-150 relative ${isLoginCol ? "" : "!lg:mt-0"}`}
+      data-theme="light"
+      className={`max-w-6xl mx-auto grow flex flex-col lg:flex-row items-stretch rounded-lg shadow-lg h-auto md:overflow-hidden overflow-visible lg:min-h-150 relative ${isLoginCol ? "" : "!lg:mt-0"}`}
       style={
         !isLoginCol && typeof window !== "undefined" && window.innerWidth < 1024
           ? {
@@ -116,7 +117,7 @@ const Container = () => {
       </div>
 
       {/* 2. Banner Container (Desktop e strictly 50% width) */}
-      <div
+      {/* <div
         ref={bannerRef}
         className={`w-full lg:basis-1/2 flex flex-col items-center justify-center gap-5 text-center min-h-100 lg:h-auto py-10 px-4 transition-transform duration-700 
           ${
@@ -143,7 +144,44 @@ const Container = () => {
           This page is built on Next JS, TypeScript, Mongoose and Next Auth.
         </p>
         <button
-          className="border-0 px-15 btn btn-lg rounded-3xl bg-linear-to-br from-primary to-secondary text-white uppercase text-sm cursor-pointer"
+          className="border-0 px-15 btn btn-lg rounded-3xl bg-linear-to-br from-[#26003b] to-[#b71056] text-white uppercase text-sm cursor-pointer"
+          onClick={() => setIsLoginCol(!isLoginCol)}
+        >
+          {isLoginCol ? "Sign up" : "Login"}
+        </button>
+      </div> */}
+
+      {/* 2. Banner Container (Desktop e strictly 50% width) */}
+      <div
+        ref={bannerRef}
+        className={`w-full lg:basis-1/2 flex flex-col items-center justify-center gap-5 text-center min-h-100 lg:h-auto py-10 px-4 transition-transform duration-700 
+          ${
+            isLoginCol
+              ? "translate-x-0 translate-y-0"
+              : "lg:-translate-x-full -translate-y-full lg:translate-y-0"
+          } 
+          z-50`}
+        style={{
+          backgroundImage: 'url("/dark-bg.jpg")',
+          backgroundSize: "cover",
+        }}
+      >
+        <Image
+          width={120}
+          height={50}
+          alt="Nexus Directory Logo"
+          src={"/nexus-directory-logo.png"}
+        />
+        <h2 className="text-2xl text-white font-bold">
+          {isLoginCol ? "New to Nexus?" : "Welcome Back!"}
+        </h2>
+        <p className="text-white px-5 lg:max-w-[80%] mx-auto">
+          {isLoginCol
+            ? "Create an account to discover top professionals, manage your listings, and unlock our AI-powered directory tools."
+            : "Already have an account? Log in to access your dashboard, connect with clients, and update your profile."}
+        </p>
+        <button
+          className="border-0 px-15 btn btn-lg rounded-3xl bg-linear-to-br from-[#26003b] to-[#b71056] text-white uppercase text-sm cursor-pointer"
           onClick={() => setIsLoginCol(!isLoginCol)}
         >
           {isLoginCol ? "Sign up" : "Login"}

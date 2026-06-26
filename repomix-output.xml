@@ -55,7 +55,7 @@ app/dashboard/posts/categories/page.tsx
 app/dashboard/posts/page.tsx
 app/dashboard/profile/page.tsx
 app/dashboard/settings/page.tsx
-app/favico.ico
+app/favicon.ico
 app/globals.css
 app/layout.tsx
 app/login/_components/Container.tsx
@@ -67,6 +67,7 @@ auth.config.ts
 auth.ts
 Components/NavLink/NavLink.jsx
 Components/SessionWrapper/SessionWrapper.tsx
+Components/ThemeToggle.tsx
 Components/ToasterProvider.tsx
 eslint.config.mjs
 lib/dbConnect.ts
@@ -96,18 +97,34 @@ tsconfig.json
 <files>
 This section contains the contents of the repository's files.
 
-<file path="next-auth.d.ts">
-import { DefaultSession } from "next-auth";
+<file path="Components/ThemeToggle.tsx">
+"use client";
+import { useEffect, useState } from "react";
+import { IoMdSunny } from "react-icons/io";
+import { FiMoon } from "react-icons/fi";
 
-declare module "next-auth" {
-  interface Session {
-    user: {
-      role: string;
-    } & DefaultSession["user"];
-  }
-  interface User {
-    role?: string;
-  }
+export default function ThemeToggle() {
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    // This physically attaches data-theme="dark" to the <html> tag
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50">
+      <button
+        onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+        className="btn btn-circle btn-primary shadow-lg"
+      >
+        {theme === "light" ? (
+          <FiMoon className="w-6 h-6" /> // Show moon so user knows they can switch to dark
+        ) : (
+          <IoMdSunny className="w-6 h-6" /> // Show sun so user knows they can switch to light
+        )}
+      </button>
+    </div>
+  );
 }
 </file>
 
@@ -249,14 +266,14 @@ const DashboardLayoutUi = ({ children }: { children: React.ReactNode }) => {
       <DashboardSidebarToggle></DashboardSidebarToggle>
       <div className="drawer-content">
         {/* Navbar */}
-        <nav className="navbar w-full bg-slate-700 border border-slate-500 md:flex justify-end grid grid-cols-[50px_auto_50px]">
+        <nav className="navbar w-full bg-base-200 border border-base-300 md:flex justify-end grid grid-cols-[50px_auto_50px]">
           <label
             htmlFor="drawer-dashboard"
             aria-label="open sidebar"
             className="btn btn-square btn-ghost md:hidden flex items-center"
           >
             {/* Sidebar toggle icon */}
-            <TbLayoutSidebarRightCollapse className="my-1.5 text-slate-500 inline-block size-4 text-2xl w-6 h-6" />
+            <TbLayoutSidebarRightCollapse className="my-1.5 text-base-content inline-block size-4 text-2xl w-6 h-6" />
           </label>
           <div className="px-4 flex items-end gap-3 md:hidden">
             <Image
@@ -271,18 +288,18 @@ const DashboardLayoutUi = ({ children }: { children: React.ReactNode }) => {
           <UserProfile></UserProfile>
         </nav>
         {/* Page content here */}
-        <div className="p-4 bg-slate-900 min-h-screen p-10">{children}</div>
+        <div className="p-4 bg-base-100 min-h-screen">{children}</div>
       </div>
 
-      <div className="drawer-side is-drawer-close:overflow-visible border-slate-500 bg-slate-700">
+      <div className="drawer-side is-drawer-close:overflow-visible border-base-300 bg-base">
         <label
           htmlFor="drawer-dashboard"
           aria-label="close sidebar"
           className="drawer-overlay"
         ></label>
-        <div className="flex min-h-full flex-col items-start border is-drawer-close:w-14 is-drawer-open:w-64 border-slate-500 bg-slate-700">
+        <div className="flex min-h-full flex-col items-start border is-drawer-close:w-14 is-drawer-open:w-64 border-base-300 bg-base">
           {/* Sidebar content here */}
-          <div className="px-2 py-0 border-b border-slate-500 w-full">
+          <div className="px-2 py-0 border-b border-base-300 w-full">
             <button
               className="is-drawer-close:tooltip cursor-pointer is-drawer-close:tooltip-right flex items-center  is-drawer-open:py-5 is-drawer-open:px-4 is-drawer-close:py-4"
               data-tip="Homepage"
@@ -294,10 +311,12 @@ const DashboardLayoutUi = ({ children }: { children: React.ReactNode }) => {
                 alt="dashboard-logo"
                 className="is-drawer-open:w-20 is-drawer-close:10"
               ></Image>
-              <span className="is-drawer-close:hidden">Dashboard</span>
+              <span className="is-drawer-close:hidden dark:hidden">
+                Dashboard
+              </span>
             </button>
           </div>
-          <ul className="menu px-0 w-full grow [&_li]:rounded-0 [&_li]:border-b [&_li]:border-slate-500 text-slate-400 font-medium [&_a.active]:bg-black/20">
+          <ul className="menu px-0 w-full grow [&_li]:rounded-0 [&_li]:border-b [&_li]:border-base-300 text-base-content font-medium [&_a.active]:bg-base-300/50">
             {/* List item */}
             <li>
               <NavLink
@@ -334,7 +353,7 @@ const DashboardLayoutUi = ({ children }: { children: React.ReactNode }) => {
             <label
               htmlFor="drawer-dashboard"
               aria-label="open sidebar"
-              className="btn btn-square bg-slate-500 grow box-border flex is-drawer-open:flex-row-reverse justify-between items-center border-0 p-3 is-drawer-close:tooltip is-drawer-close:tooltip-right"
+              className="btn btn-square bg-base-300 grow box-border flex is-drawer-open:flex-row-reverse justify-between items-center border-0 p-3 is-drawer-close:tooltip is-drawer-close:tooltip-right"
               data-tip="Open sidebar"
             >
               {/* Sidebar toggle icon */}
@@ -391,7 +410,7 @@ import { MdKeyboardArrowRight } from "react-icons/md";
 
 const PageTitle = ({ title }: { title: string }) => {
   return (
-    <div className="flex gap-2 items-center font-semibold text-xl text-slate-300">
+    <div className="flex gap-2 items-center font-semibold text-xl text-base-content">
       <MdKeyboardArrowRight />
       <h2>{title}</h2>
     </div>
@@ -539,7 +558,7 @@ const profilePage = async () => {
   return (
     <div>
       <PageTitle title="Profile Page"></PageTitle>
-      <h3 className="text-white mt-10">Hello! {session?.user?.name}</h3>
+      <h3 className="text-base-content mt-10">Hello! {session?.user?.name}</h3>
     </div>
   );
 };
@@ -560,89 +579,6 @@ const settingsPage = () => {
 };
 
 export default settingsPage;
-</file>
-
-<file path="app/globals.css">
-@import "tailwindcss";
-@plugin "daisyui" {
-  themes:
-    light --default,
-    dark;
-}
-
-@plugin "daisyui/theme" {
-  name: light;
-  default: true;
-  --color-primary: #26003b;
-  --color-secondary: #b71056;
-  --color-background: #bbc4c9;
-}
-
-@plugin "daisyui/theme" {
-  name: dark;
-  --color-primary: #c084fc;
-  --color-secondary: #f472b6;
-  --color-background: #0f172a;
-}
-/* @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-} */
-</file>
-
-<file path="app/layout.tsx">
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import { ToasterProvider } from "@/Components/ToasterProvider";
-import SessionWrapper from "@/Components/SessionWrapper/SessionWrapper";
-import { IoMdSunny } from "react-icons/io";
-import { FiMoon } from "react-icons/fi";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-export const metadata: Metadata = {
-  title: "Next Js Authentication System",
-  description: "Built with love",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-base-100 text-base-content transition-colors duration-300">
-        <ToasterProvider />
-        <SessionWrapper>{children}</SessionWrapper>
-        {/* Floating Theme Toggle */}
-        <div className="fixed bottom-6 right-6 z-50">
-          <label className="swap swap-rotate btn btn-circle btn-primary shadow-lg">
-            <input type="checkbox" className="theme-controller" value="dark" />
-            {/* sun icon */}
-            <IoMdSunny className="swap-off fill-current w-6 h-6" />
-            {/* moon icon */}
-            <FiMoon className="swap-on fill-current w-6 h-6" />
-          </label>
-        </div>
-      </body>
-    </html>
-  );
-}
 </file>
 
 <file path="app/login/_components/Container.tsx">
@@ -690,7 +626,8 @@ const Container = () => {
   };
   return (
     <div
-      className={`max-w-6xl mx-auto grow flex flex-col lg:flex-row items-stretch rounded-lg shadow-lg shadow-slate-950 h-auto md:overflow-hidden overflow-visible lg:min-h-150 relative ${isLoginCol ? "" : "!lg:mt-0"}`}
+      data-theme="light"
+      className={`max-w-6xl mx-auto grow flex flex-col lg:flex-row items-stretch rounded-lg shadow-lg h-auto md:overflow-hidden overflow-visible lg:min-h-150 relative ${isLoginCol ? "" : "!lg:mt-0"}`}
       style={
         !isLoginCol && typeof window !== "undefined" && window.innerWidth < 1024
           ? {
@@ -764,7 +701,7 @@ const Container = () => {
       </div>
 
       {/* 2. Banner Container (Desktop e strictly 50% width) */}
-      <div
+      {/* <div
         ref={bannerRef}
         className={`w-full lg:basis-1/2 flex flex-col items-center justify-center gap-5 text-center min-h-100 lg:h-auto py-10 px-4 transition-transform duration-700 
           ${
@@ -791,7 +728,44 @@ const Container = () => {
           This page is built on Next JS, TypeScript, Mongoose and Next Auth.
         </p>
         <button
-          className="border-0 px-15 btn btn-lg rounded-3xl bg-linear-to-br from-primary to-secondary text-white uppercase text-sm cursor-pointer"
+          className="border-0 px-15 btn btn-lg rounded-3xl bg-linear-to-br from-[#26003b] to-[#b71056] text-white uppercase text-sm cursor-pointer"
+          onClick={() => setIsLoginCol(!isLoginCol)}
+        >
+          {isLoginCol ? "Sign up" : "Login"}
+        </button>
+      </div> */}
+
+      {/* 2. Banner Container (Desktop e strictly 50% width) */}
+      <div
+        ref={bannerRef}
+        className={`w-full lg:basis-1/2 flex flex-col items-center justify-center gap-5 text-center min-h-100 lg:h-auto py-10 px-4 transition-transform duration-700 
+          ${
+            isLoginCol
+              ? "translate-x-0 translate-y-0"
+              : "lg:-translate-x-full -translate-y-full lg:translate-y-0"
+          } 
+          z-50`}
+        style={{
+          backgroundImage: 'url("/dark-bg.jpg")',
+          backgroundSize: "cover",
+        }}
+      >
+        <Image
+          width={120}
+          height={50}
+          alt="Nexus Directory Logo"
+          src={"/nexus-directory-logo.png"}
+        />
+        <h2 className="text-2xl text-white font-bold">
+          {isLoginCol ? "New to Nexus?" : "Welcome Back!"}
+        </h2>
+        <p className="text-white px-5 lg:max-w-[80%] mx-auto">
+          {isLoginCol
+            ? "Create an account to discover top professionals, manage your listings, and unlock our AI-powered directory tools."
+            : "Already have an account? Log in to access your dashboard, connect with clients, and update your profile."}
+        </p>
+        <button
+          className="border-0 px-15 btn btn-lg rounded-3xl bg-linear-to-br from-[#26003b] to-[#b71056] text-white uppercase text-sm cursor-pointer"
           onClick={() => setIsLoginCol(!isLoginCol)}
         >
           {isLoginCol ? "Sign up" : "Login"}
@@ -802,144 +776,6 @@ const Container = () => {
 };
 
 export default Container;
-</file>
-
-<file path="app/login/_components/LoginForm.tsx">
-"use client";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
-import { MdLockOutline, MdOutlineEmail } from "react-icons/md";
-type LoginFormInputs = {
-  email: string;
-  password: string;
-  rememberMeCheckBox: boolean;
-};
-const LoginForm = () => {
-  const { register, handleSubmit, reset } = useForm<LoginFormInputs>();
-  const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
-  const onSubmit = async (data: LoginFormInputs) => {
-    try {
-      toast.promise(
-        signIn("credentials", {
-          email: data.email,
-          password: data.password,
-          redirect: false,
-        }),
-        {
-          loading: "Logging in ",
-          success: (res) => {
-            if (res?.error) {
-              throw new Error(res.error);
-            }
-            reset();
-            router.push("/dashboard");
-            router.refresh();
-            return "Login Successful!";
-          },
-          error: (err) => {
-            return err.message || "Invalid Credentials!";
-          },
-        },
-      );
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  // Demo Login Handler
-
-  const handleDemoLogin = (role: "user" | "admin") => {
-    const email = role === "admin" ? "admin@demo.com" : "user@demo.com";
-    const password = "password123";
-
-    toast.promise(signIn("credentials", { email, password, redirect: false }), {
-      loading: `Logging in as ${role}...`,
-      success: (res) => {
-        if (res?.error) throw new Error(res.error);
-        router.push("/dashboard");
-        router.refresh();
-        return `Logged in as ${role}!`;
-      },
-      error: "Demo login failed. Did you create the DB users?",
-    });
-  };
-
-  return (
-    <form
-      className="h-auto w-full text-center space-y-4 inline-block [&_label]:w-full"
-      onSubmit={handleSubmit(onSubmit)}
-    >
-      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none">
-        <MdOutlineEmail className="opacity-50" />
-
-        <input
-          type="text"
-          {...register("email")}
-          className=" grow"
-          placeholder="Email address"
-        />
-      </label>
-      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none">
-        <MdLockOutline className="opacity-50" />
-        <input
-          type={showPassword ? "text" : "password"}
-          {...register("password", {
-            required: "Password is required",
-          })}
-          className="grow"
-          placeholder="Password"
-        />
-        <button
-          type="button"
-          onClick={() => setShowPassword(!showPassword)}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
-        >
-          {showPassword ? <FaEyeSlash /> : <FaEye />}
-        </button>
-      </label>
-      <div className="flex justify-between mb-4">
-        <label className="label text-sm">
-          <input
-            type="checkbox"
-            {...register("rememberMeCheckBox")}
-            className="checkbox checkbox-xs rounded-xs"
-          />
-          Remember me
-        </label>
-      </div>
-      <button
-        type="submit"
-        className="w-full btn border-0 btn-lg rounded-3xl bg-linear-to-br from-primary to-secondary text-white uppercase text-sm mt-4"
-      >
-        Login
-      </button>
-      {/* NEW: Demo Login Buttons */}
-      <div className="flex gap-2 w-full mt-2">
-        <button
-          type="button"
-          onClick={() => handleDemoLogin("user")}
-          className="btn btn-outline btn-primary btn-sm flex-1"
-        >
-          Demo User
-        </button>
-        <button
-          type="button"
-          onClick={() => handleDemoLogin("admin")}
-          className="btn btn-outline btn-secondary btn-sm flex-1"
-        >
-          Demo Admin
-        </button>
-      </div>
-    </form>
-  );
-};
-
-export default LoginForm;
 </file>
 
 <file path="app/login/_components/SignupForm.tsx">
@@ -1126,7 +962,7 @@ const SignupForm = () => {
       )}
       <button
         type="submit"
-        className="w-full btn border-0 btn-lg rounded-3xl bg-linear-to-br from-primary to-secondary text-white uppercase text-sm mt-4"
+        className="w-full btn border-0 btn-lg rounded-3xl bg-linear-to-br from-[#26003b] to-[#b71056] text-white uppercase text-sm mt-4"
       >
         Signup
       </button>
@@ -1143,7 +979,7 @@ import Container from "./_components/Container";
 
 const page = () => {
   return (
-    <section className="bg-slate-900 min-h-screen py-25 flex items-stretch z-30">
+    <section className="bg-base-200 min-h-screen py-25 flex items-stretch z-30">
       <Container />
     </section>
   );
@@ -1265,72 +1101,6 @@ export default {
     }),
   ],
 } satisfies NextAuthConfig;
-</file>
-
-<file path="auth.ts">
-import NextAuth from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import authConfig from "./auth.config";
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-  ...authConfig,
-  providers: [
-    ...authConfig.providers,
-    CredentialsProvider({
-      credentials: {
-        email: { label: "email", type: "email" },
-        password: { label: "password", type: "password" },
-      },
-      async authorize(credentials) {
-        const { dbConnect } = await import("./lib/dbConnect");
-        const User = (await import("./models/User")).default;
-        if (!credentials?.email || !credentials?.password) return null;
-        await dbConnect();
-        const user = await User.findOne({ email: credentials?.email }).select(
-          "+password",
-        );
-        if (!user) {
-          throw new Error("No user found with this email");
-        }
-        const isPasswordCorrect = bcrypt.compareSync(
-          credentials?.password as string,
-          user.password,
-        );
-        if (!isPasswordCorrect) {
-          throw new Error("Password is Incorrect");
-        }
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.name,
-          phoneNumber: user.phoneNumber,
-          image: user.image,
-          role: user.role,
-        };
-      },
-    }),
-  ],
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.role = user.role;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        session.user.role = token.role as string;
-      }
-      return session;
-    },
-  },
-  secret: process.env.AUTH_SECRET,
-  session: { strategy: "jwt" },
-  pages: {
-    signIn: "/login",
-  },
-});
 </file>
 
 <file path="Components/NavLink/NavLink.jsx">
@@ -1530,45 +1300,19 @@ const User = mongoose.models.User || mongoose.model("User", UsersSchema);
 export default User;
 </file>
 
-<file path="next.config.ts">
-import type { NextConfig } from "next";
+<file path="next-auth.d.ts">
+import { DefaultSession } from "next-auth";
 
-const nextConfig: NextConfig = {
-  /* config options here */
-  images: {
-    dangerouslyAllowSVG: true,
-    contentDispositionType: "attachment",
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "ui-avatars.com",
-        port: "",
-        pathname: "/api/**",
-      },
-      {
-        protocol: "https",
-        hostname: "lh3.googleusercontent.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "avatars.githubusercontent.com",
-        port: "",
-        pathname: "/**",
-      },
-      {
-        protocol: "https",
-        hostname: "media.licdn.com",
-        port: "",
-        pathname: "/dms/image/**",
-      },
-    ],
-  },
-};
-
-export default nextConfig;
+declare module "next-auth" {
+  interface Session {
+    user: {
+      role: string;
+    } & DefaultSession["user"];
+  }
+  interface User {
+    role?: string;
+  }
+}
 </file>
 
 <file path="package.json">
@@ -1911,6 +1655,336 @@ If you found this template helpful, please consider:
   ],
   "exclude": ["node_modules"]
 }
+</file>
+
+<file path="app/globals.css">
+@import "tailwindcss";
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark;
+}
+:root,
+[data-theme="light"] {
+  --color-primary: #26003b !important;
+  --color-secondary: #b71056 !important;
+}
+[data-theme="dark"] {
+  --color-primary: #c084fc !important;
+  --color-secondary: #f472b6 !important;
+}
+@plugin "daisyui/theme" {
+  name: light;
+  default: true;
+  --color-primary: #26003b;
+  --color-secondary: #b71056;
+  --color-background: #bbc4c9;
+}
+
+@plugin "daisyui/theme" {
+  name: dark;
+  --color-primary: #c084fc;
+  --color-secondary: #f472b6;
+  --color-background: #0f172a;
+}
+
+/* @theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+} */
+</file>
+
+<file path="app/layout.tsx">
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+import { ToasterProvider } from "@/Components/ToasterProvider";
+import SessionWrapper from "@/Components/SessionWrapper/SessionWrapper";
+import ThemeToggle from "@/Components/ThemeToggle";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Nextus Directory",
+  description: "Built with love",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col bg-base-100 text-base-content transition-colors duration-300">
+        <ToasterProvider />
+        <SessionWrapper>{children}</SessionWrapper>
+        {/* Floating Theme Toggle */}
+        <ThemeToggle />
+      </body>
+    </html>
+  );
+}
+</file>
+
+<file path="app/login/_components/LoginForm.tsx">
+"use client";
+import { signIn } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import React, { useState } from "react";
+import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
+import { MdLockOutline, MdOutlineEmail } from "react-icons/md";
+type LoginFormInputs = {
+  email: string;
+  password: string;
+  rememberMeCheckBox: boolean;
+};
+const LoginForm = () => {
+  const { register, handleSubmit, reset } = useForm<LoginFormInputs>();
+  const [showPassword, setShowPassword] = useState(false);
+  const router = useRouter();
+  const onSubmit = async (data: LoginFormInputs) => {
+    try {
+      toast.promise(
+        signIn("credentials", {
+          email: data.email,
+          password: data.password,
+          redirect: false,
+        }),
+        {
+          loading: "Logging in ",
+          success: (res) => {
+            if (res?.error) {
+              throw new Error(res.error);
+            }
+            reset();
+            router.push("/dashboard");
+            router.refresh();
+            return "Login Successful!";
+          },
+          error: (err) => {
+            return err.message || "Invalid Credentials!";
+          },
+        },
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Demo Login Handler
+
+  const handleDemoLogin = (role: "user" | "admin") => {
+    const email = role === "admin" ? "admin@demo.com" : "user@demo.com";
+    const password = "password123";
+
+    toast.promise(signIn("credentials", { email, password, redirect: false }), {
+      loading: `Logging in as ${role}...`,
+      success: (res) => {
+        if (res?.error) throw new Error(res.error);
+        router.push("/dashboard");
+        router.refresh();
+        return `Logged in as ${role}!`;
+      },
+      error: "Demo login failed. Did you create the DB users?",
+    });
+  };
+
+  return (
+    <form
+      data-theme="light"
+      className="h-auto w-full text-center space-y-4 inline-block [&_label]:w-full"
+      onSubmit={handleSubmit(onSubmit)}
+    >
+      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none">
+        <MdOutlineEmail className="opacity-50" />
+
+        <input
+          type="text"
+          {...register("email")}
+          className=" grow"
+          placeholder="Email address"
+        />
+      </label>
+      <label className="input input-md outline-0 focus:border-2 border-[0_0_2_0] focus:border-primary rounded-none">
+        <MdLockOutline className="opacity-50" />
+        <input
+          type={showPassword ? "text" : "password"}
+          {...register("password", {
+            required: "Password is required",
+          })}
+          className="grow"
+          placeholder="Password"
+        />
+        <button
+          type="button"
+          onClick={() => setShowPassword(!showPassword)}
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500"
+        >
+          {showPassword ? <FaEyeSlash /> : <FaEye />}
+        </button>
+      </label>
+      <div className="flex justify-between mb-4">
+        <label className="label text-sm">
+          <input
+            type="checkbox"
+            {...register("rememberMeCheckBox")}
+            className="checkbox checkbox-xs rounded-xs"
+          />
+          Remember me
+        </label>
+      </div>
+      <button
+        type="submit"
+        className="w-full btn border-0 btn-lg rounded-3xl bg-linear-to-br from-[#26003b] to-[#b71056] text-white uppercase text-sm mt-4"
+      >
+        Login
+      </button>
+      {/* NEW: Demo Login Buttons */}
+      <div className="flex gap-2 w-full mt-2">
+        <button
+          type="button"
+          onClick={() => handleDemoLogin("user")}
+          className="btn btn-outline btn-primary btn-sm flex-1"
+        >
+          Demo User
+        </button>
+        <button
+          type="button"
+          onClick={() => handleDemoLogin("admin")}
+          className="btn btn-outline btn-secondary btn-sm flex-1"
+        >
+          Demo Admin
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default LoginForm;
+</file>
+
+<file path="auth.ts">
+import NextAuth from "next-auth";
+import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
+import authConfig from "./auth.config";
+
+export const { handlers, auth, signIn, signOut } = NextAuth({
+  ...authConfig,
+  providers: [
+    ...authConfig.providers,
+    CredentialsProvider({
+      credentials: {
+        email: { label: "email", type: "email" },
+        password: { label: "password", type: "password" },
+      },
+      async authorize(credentials) {
+        const { dbConnect } = await import("./lib/dbConnect");
+        const User = (await import("./models/User")).default;
+        if (!credentials?.email || !credentials?.password) return null;
+        await dbConnect();
+        const user = await User.findOne({ email: credentials?.email }).select(
+          "+password",
+        );
+        if (!user) {
+          throw new Error("No user found with this email");
+        }
+        const isPasswordCorrect = bcrypt.compareSync(
+          credentials?.password as string,
+          user.password,
+        );
+        if (!isPasswordCorrect) {
+          throw new Error("Password is Incorrect");
+        }
+        return {
+          id: user._id.toString(),
+          email: user.email,
+          name: user.name,
+          phoneNumber: user.phoneNumber,
+          image: user.image,
+          role: user.role,
+        };
+      },
+    }),
+  ],
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.role = token.role as string;
+      }
+      return session;
+    },
+  },
+  secret: process.env.AUTH_SECRET,
+  session: { strategy: "jwt" },
+  pages: {
+    signIn: "/login",
+  },
+});
+</file>
+
+<file path="next.config.ts">
+import type { NextConfig } from "next";
+
+const nextConfig: NextConfig = {
+  /* config options here */
+  images: {
+    dangerouslyAllowSVG: true,
+    contentDispositionType: "attachment",
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "ui-avatars.com",
+        port: "",
+        pathname: "/api/**",
+      },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+        port: "",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "media.licdn.com",
+        port: "",
+        pathname: "/dms/image/**",
+      },
+    ],
+  },
+};
+
+export default nextConfig;
 </file>
 
 </files>
