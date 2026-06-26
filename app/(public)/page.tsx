@@ -1,7 +1,3 @@
-// import TrendingServices from "./_components/home/TrendingServices";
-// import CtaSection from "./_components/home/CtaSection";
-// import Footer from "./_components/home/Footer";
-
 import CategorySection from "./_components/CategorySection";
 import CtaSection from "./_components/CtaSection";
 import HeroSection from "./_components/HeroSection";
@@ -13,8 +9,6 @@ import WhyChooseUs from "./_components/WhyChooseUs";
 export default function Home() {
   return (
     <main className="flex flex-col min-h-screen bg-base-100 text-base-content w-full overflow-x-hidden">
-      {/* Navbar will go in layout or top of here if not already global */}
-
       <HeroSection />
       <StatsSection />
       <CategorySection />

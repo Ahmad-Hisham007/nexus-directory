@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { FiSearch, FiStar, FiClock } from "react-icons/fi";
-import { servicesData } from "@/lib/data";
+import React, { useState, useMemo, useEffect } from "react";
+import { FiSearch } from "react-icons/fi";
 import { useDebounce } from "@/hooks/useDebounce";
-import ServiceCard from "@/Components/ServiceLoop/ServiceLoop";
+import ServiceCard, { ServiceType } from "@/Components/ServiceLoop/ServiceLoop";
+import toast from "react-hot-toast";
 
 export default function ExplorePage() {
-  // State Management
+  // NEW: State for dynamic data and loading
+  const [servicesData, setServicesData] = useState<ServiceType[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Existing States
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [maxPrice, setMaxPrice] = useState<number>(1000);
@@ -19,10 +21,34 @@ export default function ExplorePage() {
   const itemsPerPage = 6;
   const debouncedSearch = useDebounce(searchTerm, 500);
 
-  // Categories extraction
+  // Fetch Data on Mount using toast.promise
+  useEffect(() => {
+    const fetchServices = async () => {
+      const res = await fetch("/api/services");
+      if (!res.ok) throw new Error("Failed to load data");
+      return res.json();
+    };
+
+    toast.promise(fetchServices(), {
+      loading: "Loading services...",
+      success: (data) => {
+        setServicesData(data);
+        setIsLoading(false);
+        return "Services loaded successfully!";
+      },
+      error: (err) => {
+        setIsLoading(false);
+        return "Error fetching services";
+      },
+    });
+  }, []);
+
+  // Dynamic Categories extraction
   const categories = [
     "All",
-    ...Array.from(new Set(servicesData.map((s) => s.category))),
+    ...Array.from(
+      new Set(servicesData.map((s) => s.category || "Uncategorized")),
+    ),
   ];
 
   // Filtering & Sorting Logic
@@ -35,30 +61,28 @@ export default function ExplorePage() {
           .includes(debouncedSearch.toLowerCase());
       const matchesCategory =
         selectedCategory === "All" || service.category === selectedCategory;
-      const matchesPrice = service.price <= maxPrice;
+      const matchesPrice = Number(service.price) <= maxPrice;
 
       return matchesSearch && matchesCategory && matchesPrice;
     });
 
     switch (sortBy) {
       case "price-asc":
-        result.sort((a, b) => a.price - b.price);
+        result.sort((a, b) => Number(a.price) - Number(b.price));
         break;
       case "price-desc":
-        result.sort((a, b) => b.price - a.price);
+        result.sort((a, b) => Number(b.price) - Number(a.price));
         break;
       case "rating":
-        result.sort((a, b) => b.rating - a.rating);
+        result.sort((a, b) => Number(b.rating) - Number(a.rating));
         break;
       default:
-        // "recommended" keeps original order
         break;
     }
 
     return result;
-  }, [debouncedSearch, selectedCategory, maxPrice, sortBy]);
+  }, [servicesData, debouncedSearch, selectedCategory, maxPrice, sortBy]);
 
-  // Pagination Logic
   const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
   const paginatedData = filteredAndSortedData.slice(
     (currentPage - 1) * itemsPerPage,
@@ -73,33 +97,37 @@ export default function ExplorePage() {
           <h2 className="text-xl font-bold text-base-content border-b border-base-300 pb-4">
             Filters
           </h2>
-
-          {/* Category Filter */}
           <div>
             <h3 className="font-semibold text-base-content mb-4">Category</h3>
             <div className="flex flex-col gap-2">
-              {categories.map((cat) => (
-                <label
-                  key={cat}
-                  className="flex items-center gap-3 cursor-pointer"
-                >
-                  <input
-                    type="radio"
-                    name="category"
-                    className="radio radio-primary radio-sm"
-                    checked={selectedCategory === cat}
-                    onChange={() => {
-                      setSelectedCategory(cat);
-                      setCurrentPage(1); // Reset page on filter change
-                    }}
-                  />
-                  <span className="text-base-content/80">{cat}</span>
-                </label>
-              ))}
+              {isLoading
+                ? // Skeleton for categories
+                  [1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="skeleton h-4 w-24 bg-base-300 rounded-full"
+                    ></div>
+                  ))
+                : categories.map((cat) => (
+                    <label
+                      key={cat}
+                      className="flex items-center gap-3 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        name="category"
+                        className="radio radio-primary radio-sm"
+                        checked={selectedCategory === cat}
+                        onChange={() => {
+                          setSelectedCategory(cat);
+                          setCurrentPage(1);
+                        }}
+                      />
+                      <span className="text-base-content/80">{cat}</span>
+                    </label>
+                  ))}
             </div>
           </div>
-
-          {/* Price Filter */}
           <div>
             <div className="flex justify-between items-center mb-4">
               <h3 className="font-semibold text-base-content">Max Price</h3>
@@ -118,16 +146,11 @@ export default function ExplorePage() {
                 setCurrentPage(1);
               }}
             />
-            <div className="flex justify-between text-xs text-base-content/50 mt-2 px-1">
-              <span>$50</span>
-              <span>$1000</span>
-            </div>
           </div>
         </aside>
 
         {/* Main Content Area */}
         <div className="w-full lg:w-3/4 flex flex-col gap-6">
-          {/* Top Bar: Search & Sort */}
           <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-base-200 p-4 rounded-2xl border border-base-300">
             <div className="relative w-full md:w-1/2">
               <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50" />
@@ -142,7 +165,6 @@ export default function ExplorePage() {
                 }}
               />
             </div>
-
             <div className="flex items-center gap-2 w-full md:w-auto">
               <span className="text-sm text-base-content/70 whitespace-nowrap">
                 Sort by:
@@ -160,13 +182,25 @@ export default function ExplorePage() {
             </div>
           </div>
 
-          {/* Results Info */}
           <div className="text-sm text-base-content/60">
-            Showing {filteredAndSortedData.length} results
+            {isLoading
+              ? "Loading..."
+              : `Showing ${filteredAndSortedData.length} results`}
           </div>
 
-          {/* Grid Layout (Reusing Home Page Card Design) */}
-          {paginatedData.length > 0 ? (
+          {/* Dynamic Grid Layout or Loading Skeleton */}
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="flex flex-col gap-4 w-full">
+                  <div className="skeleton h-48 w-full bg-base-300"></div>
+                  <div className="skeleton h-4 w-28 bg-base-300"></div>
+                  <div className="skeleton h-4 w-full bg-base-300"></div>
+                  <div className="skeleton h-4 w-full bg-base-300"></div>
+                </div>
+              ))}
+            </div>
+          ) : paginatedData.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               {paginatedData.map((service) => (
                 <ServiceCard service={service} key={service.id} />
@@ -182,8 +216,8 @@ export default function ExplorePage() {
             </div>
           )}
 
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
+          {/* Pagination */}
+          {!isLoading && totalPages > 1 && (
             <div className="flex justify-center items-center gap-2 mt-8">
               <button
                 className="btn btn-sm btn-outline rounded-full"
@@ -192,7 +226,6 @@ export default function ExplorePage() {
               >
                 Prev
               </button>
-
               <div className="flex gap-1">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
                   (page) => (
@@ -206,7 +239,6 @@ export default function ExplorePage() {
                   ),
                 )}
               </div>
-
               <button
                 className="btn btn-sm btn-outline rounded-full"
                 disabled={currentPage === totalPages}

@@ -42,14 +42,21 @@ The content is organized as follows:
 <directory_structure>
 .gitignore
 app/(public)/_components/CategorySection.tsx
+app/(public)/_components/CtaSection.tsx
 app/(public)/_components/Footer.tsx
 app/(public)/_components/HeroSection.tsx
+app/(public)/_components/HowItWorks.tsx
 app/(public)/_components/Navbar.tsx
 app/(public)/_components/StatsSection.tsx
+app/(public)/_components/TrendingServices.tsx
+app/(public)/_components/WhyChooseUs.tsx
+app/(public)/explore/page.tsx
 app/(public)/layout.tsx
 app/(public)/page.tsx
+app/(public)/services/[id]/page.tsx
 app/api/auth/[...nextauth]/route.ts
 app/api/register/route.ts
+app/api/seed/route.ts
 app/api/test-db/route.ts
 app/dashboard/_components/DashboardLayoutUi.tsx
 app/dashboard/_components/DashboardSidebarToggle.tsx
@@ -72,12 +79,17 @@ app/login/page.tsx
 auth.config.ts
 auth.ts
 Components/NavLink/NavLink.jsx
+Components/ServiceLoop/ServiceLoop.tsx
 Components/SessionWrapper/SessionWrapper.tsx
 Components/ThemeToggle.tsx
 Components/ToasterProvider.tsx
 eslint.config.mjs
+hooks/useDebounce.ts
+lib/data.ts
 lib/dbConnect.ts
 models/Account.ts
+models/Category.ts
+models/Service.ts
 models/Session.ts
 models/User.ts
 next-auth.d.ts
@@ -86,6 +98,8 @@ package.json
 postcss.config.mjs
 proxy.ts
 public/dark-bg.jpg
+public/dashboard-img.jpg
+public/dashboard-min.jpg
 public/file.svg
 public/globe.svg
 public/Hero-image.webp
@@ -105,21 +119,21 @@ tsconfig.json
 <files>
 This section contains the contents of the repository's files.
 
-<file path="tailwind.config.ts">
-/** @type {import('tailwindcss').Config} */
+<file path="models/Category.ts">
+import mongoose from "mongoose";
 
-module.exports = {
-  content: [
-    "./app/**/*.{js,ts,jsx,tsx,mdx}", // For Next.js App Router
-    "./pages/**/*.{js,ts,jsx,tsx,mdx}", // For Next.js Pages Router
-    "./components/**/*.{js,ts,jsx,tsx,mdx}", // For your global components
-    "./src/**/*.{js,ts,jsx,tsx,mdx}", // If you are using a /src directory
-  ],
-  theme: {
-    extend: {},
+const CategorySchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, unique: true },
+    slug: { type: String, required: true, unique: true },
   },
-  plugins: [require("daisyui")],
-};
+  { timestamps: true },
+);
+
+const Category =
+  mongoose.models.Category || mongoose.model("Category", CategorySchema);
+
+export default Category;
 </file>
 
 <file path=".gitignore">
@@ -166,58 +180,106 @@ yarn-error.log*
 next-env.d.ts
 </file>
 
-<file path="app/(public)/_components/CategorySection.tsx">
-import {
-  FiMonitor,
-  FiPenTool,
-  FiTrendingUp,
-  FiVideo,
-  FiMusic,
-  FiCode,
-} from "react-icons/fi";
+<file path="app/(public)/_components/CtaSection.tsx">
+import Link from "next/link";
 
-const CategorySection = () => {
-  const categories = [
-    { icon: FiMonitor, name: "Development & IT", count: "1,234 skills" },
-    { icon: FiPenTool, name: "Design & Creative", count: "842 skills" },
-    { icon: FiTrendingUp, name: "Digital Marketing", count: "354 skills" },
-    { icon: FiVideo, name: "Video & Animation", count: "299 skills" },
-    { icon: FiMusic, name: "Music & Audio", count: "185 skills" },
-    { icon: FiCode, name: "Programming & Tech", count: "945 skills" },
+const CtaSection = () => {
+  return (
+    <section className="w-full bg-base-200 py-24 px-6">
+      <div className="max-w-5xl mx-auto rounded-3xl p-10 lg:p-16 text-center relative overflow-hidden shadow-2xl">
+        {/* Background Gradient */}
+        <div className="absolute inset-0 bg-linear-to-br from-[#26003b] to-[#b71056]"></div>
+
+        <div className="relative z-10">
+          <h2 className="text-3xl lg:text-5xl font-bold text-white mb-6">
+            Ready to bring your ideas to life?
+          </h2>
+          <p className="text-white/80 text-lg max-w-2xl mx-auto mb-10">
+            Join thousands of businesses and professionals who are already using
+            Nexus to build amazing things together.
+          </p>
+
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            {/* Standard Primary Button Variant (Inverted for dark background) */}
+            <Link
+              href="/login"
+              className="btn md:btn-lg btn-md rounded-full border-0 bg-white text-[#26003b] hover:bg-base-200 px-10"
+            >
+              Get Started Now
+            </Link>
+            {/* Standard Outline Button */}
+            <Link
+              href="/explore"
+              className="btn md:btn-lg btn-md btn-outline rounded-full text-white border-white hover:bg-white hover:text-[#26003b] px-10"
+            >
+              Explore Services
+            </Link>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default CtaSection;
+</file>
+
+<file path="app/(public)/_components/HowItWorks.tsx">
+import { FiUserPlus, FiSearch, FiCheckSquare } from "react-icons/fi";
+
+const HowItWorks = () => {
+  const steps = [
+    {
+      icon: FiUserPlus,
+      title: "1. Create an Account",
+      description:
+        "Sign up for free, set up your profile, and join our network of professionals.",
+    },
+    {
+      icon: FiSearch,
+      title: "2. Find the Right Fit",
+      description:
+        "Browse portfolios, compare prices, and read reviews to find your perfect match.",
+    },
+    {
+      icon: FiCheckSquare,
+      title: "3. Work & Pay Safely",
+      description:
+        "Collaborate directly and release payment only when you are 100% satisfied.",
+    },
   ];
 
   return (
-    <section className="w-full bg-base-200 py-20 px-6">
-      <div className="max-w-7xl mx-auto">
-        <div className="flex justify-between items-end mb-10">
-          <div>
-            <h2 className="text-3xl font-bold text-base-content mb-2">
-              Browse by category
-            </h2>
-            <p className="text-base-content/70">
-              Find the specific talent you need to accelerate your business.
-            </p>
-          </div>
-          <button className="btn btn-outline hidden md:flex">
-            All Categories
-          </button>
-        </div>
+    <section className="w-full bg-base-100 py-20 px-6">
+      <div className="max-w-7xl mx-auto text-center">
+        <h2 className="text-3xl lg:text-4xl font-bold text-base-content mb-4">
+          How Nexus Works
+        </h2>
+        <p className="text-base-content/70 max-w-2xl mx-auto mb-16">
+          Our platform is designed to make connecting, collaborating, and
+          completing projects as seamless as possible.
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {categories.map((cat, index) => {
-            const Icon = cat.icon;
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {steps.map((step, idx) => {
+            const Icon = step.icon;
             return (
               <div
-                key={index}
-                className="bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300 hover:border-primary hover:shadow-md transition-all cursor-pointer group flex flex-col items-center text-center"
+                key={idx}
+                className="flex flex-col items-center relative z-10"
               >
-                <div className="w-14 h-14 rounded-full bg-base-200 group-hover:bg-primary/10 flex items-center justify-center mb-4 transition-colors">
-                  <Icon className="w-6 h-6 text-base-content group-hover:text-primary" />
+                {/* Connector Line for Desktop */}
+                {idx !== steps.length - 1 && (
+                  <div className="hidden md:block absolute top-10 left-[60%] w-full h-[2px] bg-base-300 -z-10"></div>
+                )}
+
+                <div className="w-20 h-20 rounded-full bg-base-200 border border-base-300 flex items-center justify-center mb-6 shadow-sm group-hover:border-primary transition-colors">
+                  <Icon className="w-8 h-8 text-primary" />
                 </div>
-                <h3 className="font-semibold text-base-content mb-1">
-                  {cat.name}
+                <h3 className="font-bold text-xl text-base-content mb-3">
+                  {step.title}
                 </h3>
-                <p className="text-xs text-base-content/60">{cat.count}</p>
+                <p className="text-base-content/70 px-4">{step.description}</p>
               </div>
             );
           })}
@@ -227,287 +289,402 @@ const CategorySection = () => {
   );
 };
 
-export default CategorySection;
+export default HowItWorks;
 </file>
 
-<file path="app/(public)/_components/Footer.tsx">
+<file path="app/(public)/_components/TrendingServices.tsx">
+import ServiceCard from "@/Components/ServiceLoop/ServiceLoop";
 import Image from "next/image";
 import Link from "next/link";
-import { FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa";
+import { FiStar, FiClock } from "react-icons/fi";
 
-const Footer = () => {
-  return (
-    <footer className="w-full bg-base-200 border-t border-base-300 pt-16 pb-8 px-6 transition-colors duration-300">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 footer text-base-content">
-        <aside className="max-w-xs space-y-4">
-          <Image
-            src="/nexus-directory-logo.png"
-            alt="Nexus Directory"
-            width={150}
-            height={50}
-          />
-          <p className="text-base-content/70 text-sm">
-            Nexus Directory Ltd.
-            <br />
-            Connecting businesses with top-tier professionals seamlessly since
-            2026.
-          </p>
-          <div className="flex gap-4 mt-4">
-            <a
-              href="#"
-              className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center hover:bg-primary hover:text-white transition-all cursor-pointer"
-            >
-              <FaLinkedinIn />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center hover:bg-primary hover:text-white transition-all cursor-pointer"
-            >
-              <FaGithub />
-            </a>
-            <a
-              href="#"
-              className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center hover:bg-primary hover:text-white transition-all cursor-pointer"
-            >
-              <FaFacebookF />
-            </a>
-          </div>
-        </aside>
-
-        <nav>
-          <h6 className="footer-title text-base-content">Services</h6>
-          <Link href="#" className="link link-hover text-base-content/70">
-            Web Development
-          </Link>
-          <Link href="#" className="link link-hover text-base-content/70">
-            Design & Branding
-          </Link>
-          <Link href="#" className="link link-hover text-base-content/70">
-            Digital Marketing
-          </Link>
-          <Link href="#" className="link link-hover text-base-content/70">
-            SEO Optimization
-          </Link>
-        </nav>
-        <nav>
-          <h6 className="footer-title text-base-content">Company</h6>
-          <Link href="#" className="link link-hover text-base-content/70">
-            About us
-          </Link>
-          <Link href="#" className="link link-hover text-base-content/70">
-            Contact
-          </Link>
-          <Link href="#" className="link link-hover text-base-content/70">
-            Jobs
-          </Link>
-          <Link href="#" className="link link-hover text-base-content/70">
-            Press kit
-          </Link>
-        </nav>
-        <nav>
-          <h6 className="footer-title text-base-content">Legal</h6>
-          <Link href="#" className="link link-hover text-base-content/70">
-            Terms of use
-          </Link>
-          <Link href="#" className="link link-hover text-base-content/70">
-            Privacy policy
-          </Link>
-          <Link href="#" className="link link-hover text-base-content/70">
-            Cookie policy
-          </Link>
-        </nav>
-      </div>
-
-      <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-base-300 text-center text-sm text-base-content/50">
-        <p>
-          © {new Date().getFullYear()} Nexus Directory. All rights reserved.
-        </p>
-      </div>
-    </footer>
-  );
-};
-
-export default Footer;
-</file>
-
-<file path="app/(public)/_components/HeroSection.tsx">
-import Image from "next/image";
-import Link from "next/link";
-import { FiSearch } from "react-icons/fi";
-import { IoRibbonOutline } from "react-icons/io5";
-import { LuShieldCheck } from "react-icons/lu";
-
-const HeroSection = () => {
-  return (
-    <section className="w-full bg-base-100 pt-20 pb-16 lg:pt-32 lg:pb-24 px-6">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-12 items-stretch justify-between">
-        {/* Left Content */}
-        <div className="space-y-8 lg:w-150 w-full z-10">
-          <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm">
-            Top Rated Directory Platform
-          </div>
-          <h1 className="text-4xl lg:text-6xl font-bold leading-tight text-base-content">
-            Find the perfect <span className="text-primary">professionals</span>{" "}
-            for your next big project.
-          </h1>
-          <p className="text-lg text-base-content/70 max-w-xl">
-            Connect with top-tier agencies, vetted freelancers, and expert
-            consultants ready to elevate your business.
-          </p>
-
-          {/* Search Bar matching the Freeio template */}
-          <div className="bg-base-200 p-2 rounded-full shadow-lg shadow-base-300 flex items-center max-w-lg border border-base-300">
-            <FiSearch className="text-base-content/50 ml-4 w-5 h-5 text0-lg" />
-            <input
-              type="text"
-              placeholder="What service are you looking for?"
-              className="bg-transparent border-none outline-none px-4 py-3 w-full text-base-content placeholder:text-base-content/50 placeholder:text-sm md:placeholder:text-normal"
-            />
-            <button className="btn btn-primary rounded-full md:px-8 px-4">
-              Search
-            </button>
-          </div>
-
-          <div className="flex items-center gap-4 text-sm font-medium text-base-content/60 pt-4">
-            <span>Popular:</span>
-            <Link href="#" className="hover:text-primary transition-colors">
-              Web Design
-            </Link>
-            <Link href="#" className="hover:text-primary transition-colors">
-              SEO
-            </Link>
-            <Link href="#" className="hover:text-primary transition-colors">
-              Marketing
-            </Link>
-          </div>
-        </div>
-
-        {/* Right Image/Illustration Area */}
-        <div className="relative lg:w-120 w-full lg:block rounded-3xl">
-          <Image
-            src="/Hero-image.webp"
-            alt="Hero Image"
-            width={900}
-            height={700}
-            className="aspect-square block w-full h-full object-cover rounded-3xl"
-          />
-
-          {/* Floating badge to match template vibes */}
-          <div className="py-4 px-8 absolute md:-bottom-20 bottom-10 -left-5 bg-base-100  rounded-xl shadow-xl border border-base-300 flex items-center gap-3">
-            <div className="md:w-14 md:h-14 w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-600 md:text-2xl text-lg">
-              <IoRibbonOutline />
-            </div>
-            <div>
-              <p className="font-bold md:text-lg text-normal text-base-content/80">
-                Verified Experts
-              </p>
-              <p className="text-normal text-base-content/60">
-                Quality guaranteed
-              </p>
-            </div>
-          </div>
-          <div className="py-4 px-8 absolute bottom-20 -right-5 bg-base-100  rounded-xl shadow-xl border border-base-300 md:flex hidden items-center gap-3">
-            <div className="md:w-14 md:h-14 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 md:text-2xl text-lg">
-              <LuShieldCheck />
-            </div>
-            <div>
-              <p className="font-bold md:text-lg text-normal text-base-content/80">
-                Safe & Secure
-              </p>
-              <p className="text-normal text-base-content/60">
-                Your privacy, our responsibility
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-};
-
-export default HeroSection;
-</file>
-
-<file path="app/(public)/_components/Navbar.tsx">
-import Link from "next/link";
-import Image from "next/image";
-
-const Navbar = () => {
-  return (
-    <header className="navbar bg-base-100 shadow-sm sticky top-0 z-50 px-4 lg:px-8 py-3 border-b border-base-300 transition-colors duration-300">
-      <div className="flex-1">
-        <Link href="/" className="flex items-center gap-2">
-          {/* Using your existing logo */}
-          <Image
-            src="/nexus-directory-logo.png"
-            alt="Nexus Directory"
-            width={140}
-            height={45}
-            className="object-contain"
-          />
-        </Link>
-      </div>
-
-      {/* Desktop Menu */}
-      <div className="flex-none hidden lg:flex gap-6 mr-6 font-medium text-base-content/80">
-        <Link href="/" className="hover:text-primary transition-colors">
-          Home
-        </Link>
-        <Link href="/explore" className="hover:text-primary transition-colors">
-          Explore
-        </Link>
-        <Link href="/about" className="hover:text-primary transition-colors">
-          About
-        </Link>
-      </div>
-
-      <div className="flex-none gap-4">
-        {/* Sign In routes to the Container.tsx page we just perfected */}
-        <Link
-          href="/login"
-          className="btn btn-primary rounded-full px-8 text-white bg-linear-to-br from-[#26003b] to-[#b71056] border-0 hover:scale-105 transition-transform"
-        >
-          Sign In
-        </Link>
-      </div>
-    </header>
-  );
-};
-
-export default Navbar;
-</file>
-
-<file path="app/(public)/_components/StatsSection.tsx">
-const StatsSection = () => {
-  const stats = [
-    { value: "834M", label: "Total Freelancers" },
-    { value: "732M", label: "Positive Reviews" },
-    { value: "90M", label: "Order Received" },
-    { value: "236M", label: "Projects Completed" },
+const TrendingServices = () => {
+  // Hardcoded MVP data. No lorem ipsum as per requirements.
+  const services = [
+    {
+      id: 1,
+      title: "Full-Stack Web Development",
+      description:
+        "Custom built, responsive, and SEO-optimized web applications using Next.js.",
+      author: "Alex Morgan",
+      rating: "4.9",
+      reviews: 124,
+      price: "$500+",
+      delivery: "7 days",
+    },
+    {
+      id: 2,
+      title: "Brand Identity & Logo Design",
+      description:
+        "Professional and modern brand identity packages including logos and guidelines.",
+      author: "Sarah Chen",
+      rating: "5.0",
+      reviews: 89,
+      price: "$250+",
+      delivery: "3 days",
+    },
+    {
+      id: 3,
+      title: "Advanced Technical SEO",
+      description:
+        "Comprehensive site audits, keyword strategies, and indexing optimization.",
+      author: "David Kumar",
+      rating: "4.8",
+      reviews: 210,
+      price: "$300+",
+      delivery: "5 days",
+    },
+    {
+      id: 4,
+      title: "UI/UX Mobile App Design",
+      description:
+        "High-fidelity Figma prototypes and user flows for iOS and Android applications.",
+      author: "Elena Rodriguez",
+      rating: "4.9",
+      reviews: 156,
+      price: "$400+",
+      delivery: "10 days",
+    },
   ];
 
   return (
-    <section className="w-full bg-primary py-12 px-6">
-      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:divide-x  divide-white/20">
-        {stats.map((stat, index) => (
-          <div
-            key={index}
-            className="flex flex-col items-center justify-center text-center px-4"
-          >
-            <h3 className="text-3xl lg:text-5xl font-bold text-white mb-2">
-              {stat.value}
-            </h3>
-            <p className="text-white/80 text-sm lg:text-base font-medium">
-              {stat.label}
+    <section className="w-full bg-base-100 py-20 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h2 className="text-3xl font-bold text-base-content mb-2">
+              Trending Services
+            </h2>
+            <p className="text-base-content/70">
+              Most popular choices for growing your business.
             </p>
           </div>
-        ))}
+          <Link
+            href="/explore"
+            className="btn btn-outline hidden md:flex rounded-full"
+          >
+            Explore All
+          </Link>
+        </div>
+
+        {/* Desktop: 4 per row, matching requirements */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {services.map((service) => (
+            <ServiceCard service={service} key={service.id} />
+          ))}
+        </div>
       </div>
     </section>
   );
 };
 
-export default StatsSection;
+export default TrendingServices;
+</file>
+
+<file path="app/(public)/_components/WhyChooseUs.tsx">
+import Image from "next/image";
+import { FiCheckCircle } from "react-icons/fi";
+
+const WhyChooseUs = () => {
+  const benefits = [
+    {
+      title: "Proof of quality",
+      description:
+        "Check any pro's work samples, client reviews, and identity verification.",
+    },
+    {
+      title: "No cost until you hire",
+      description:
+        "Interview potential fits for your job, negotiate rates, and only pay for work you approve.",
+    },
+    {
+      title: "Safe and secure",
+      description:
+        "Focus on your work knowing we help protect your data and privacy with state-of-the-art security.",
+    },
+  ];
+
+  return (
+    <section className="w-full bg-base-200 py-20 px-6">
+      <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-16 items-center">
+        {/* Left: Text & Features */}
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-3xl lg:text-4xl font-bold text-base-content mb-4">
+              A whole world of freelance talent at your fingertips
+            </h2>
+            <p className="text-lg text-base-content/70">
+              We connect you with the best professionals to execute your
+              projects flawlessly, on time, and strictly within budget.
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            {benefits.map((benefit, idx) => (
+              <div key={idx} className="flex gap-4 items-start">
+                <FiCheckCircle className="text-primary w-6 h-6 shrink-0 mt-1" />
+                <div>
+                  <h4 className="font-bold text-lg text-base-content">
+                    {benefit.title}
+                  </h4>
+                  <p className="text-base-content/70 mt-1">
+                    {benefit.description}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Right: Visual Block */}
+        <div className="relative w-full bg-base-100 rounded-3xl border border-base-300 shadow-sm flex flex-col justify-center">
+          <Image
+            src="/dashboard-img.jpg"
+            alt="Nexus Directory"
+            width={700}
+            height={560}
+            className="object-cover w-full h-auto rounded-2xl"
+          />
+
+          <div className="absolute -left-8 top-1/4 bg-base-100 p-4 rounded-xl shadow-xl border border-base-300">
+            <div className="font-bold text-2xl text-base-content">4.9/5</div>
+            <div className="text-sm text-base-content/60">Average Rating</div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default WhyChooseUs;
+</file>
+
+<file path="app/(public)/explore/page.tsx">
+"use client";
+
+import React, { useState, useMemo } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { FiSearch, FiStar, FiClock } from "react-icons/fi";
+import { servicesData } from "@/lib/data";
+import { useDebounce } from "@/hooks/useDebounce";
+import ServiceCard from "@/Components/ServiceLoop/ServiceLoop";
+
+export default function ExplorePage() {
+  // State Management
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [maxPrice, setMaxPrice] = useState<number>(1000);
+  const [sortBy, setSortBy] = useState("recommended");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const itemsPerPage = 6;
+  const debouncedSearch = useDebounce(searchTerm, 500);
+
+  // Categories extraction
+  const categories = [
+    "All",
+    ...Array.from(new Set(servicesData.map((s) => s.category))),
+  ];
+
+  // Filtering & Sorting Logic
+  const filteredAndSortedData = useMemo(() => {
+    const result = servicesData.filter((service) => {
+      const matchesSearch =
+        service.title.toLowerCase().includes(debouncedSearch.toLowerCase()) ||
+        service.description
+          .toLowerCase()
+          .includes(debouncedSearch.toLowerCase());
+      const matchesCategory =
+        selectedCategory === "All" || service.category === selectedCategory;
+      const matchesPrice = service.price <= maxPrice;
+
+      return matchesSearch && matchesCategory && matchesPrice;
+    });
+
+    switch (sortBy) {
+      case "price-asc":
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case "price-desc":
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        result.sort((a, b) => b.rating - a.rating);
+        break;
+      default:
+        // "recommended" keeps original order
+        break;
+    }
+
+    return result;
+  }, [debouncedSearch, selectedCategory, maxPrice, sortBy]);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredAndSortedData.length / itemsPerPage);
+  const paginatedData = filteredAndSortedData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
+
+  return (
+    <div className="w-full bg-base-100 min-h-screen py-10 px-6">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-8">
+        {/* Sidebar Filters */}
+        <aside className="w-full lg:w-1/4 space-y-8 bg-base-200 p-6 rounded-2xl border border-base-300 h-fit sticky top-24">
+          <h2 className="text-xl font-bold text-base-content border-b border-base-300 pb-4">
+            Filters
+          </h2>
+
+          {/* Category Filter */}
+          <div>
+            <h3 className="font-semibold text-base-content mb-4">Category</h3>
+            <div className="flex flex-col gap-2">
+              {categories.map((cat) => (
+                <label
+                  key={cat}
+                  className="flex items-center gap-3 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    name="category"
+                    className="radio radio-primary radio-sm"
+                    checked={selectedCategory === cat}
+                    onChange={() => {
+                      setSelectedCategory(cat);
+                      setCurrentPage(1); // Reset page on filter change
+                    }}
+                  />
+                  <span className="text-base-content/80">{cat}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Price Filter */}
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="font-semibold text-base-content">Max Price</h3>
+              <span className="text-sm font-bold text-primary">
+                ${maxPrice}
+              </span>
+            </div>
+            <input
+              type="range"
+              min="50"
+              max="1000"
+              value={maxPrice}
+              className="range range-primary range-sm"
+              onChange={(e) => {
+                setMaxPrice(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+            />
+            <div className="flex justify-between text-xs text-base-content/50 mt-2 px-1">
+              <span>$50</span>
+              <span>$1000</span>
+            </div>
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <div className="w-full lg:w-3/4 flex flex-col gap-6">
+          {/* Top Bar: Search & Sort */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 bg-base-200 p-4 rounded-2xl border border-base-300">
+            <div className="relative w-full md:w-1/2">
+              <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-base-content/50" />
+              <input
+                type="text"
+                placeholder="Search services..."
+                className="input input-bordered w-full pl-10 rounded-full bg-base-100 focus:outline-primary border-base-300"
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  setCurrentPage(1);
+                }}
+              />
+            </div>
+
+            <div className="flex items-center gap-2 w-full md:w-auto">
+              <span className="text-sm text-base-content/70 whitespace-nowrap">
+                Sort by:
+              </span>
+              <select
+                className="select select-bordered rounded-full bg-base-100 border-base-300 focus:outline-primary w-full md:w-auto"
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+              >
+                <option value="recommended">Recommended</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="rating">Highest Rated</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Results Info */}
+          <div className="text-sm text-base-content/60">
+            Showing {filteredAndSortedData.length} results
+          </div>
+
+          {/* Grid Layout (Reusing Home Page Card Design) */}
+          {paginatedData.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {paginatedData.map((service) => (
+                <ServiceCard service={service} key={service.id} />
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-20 text-base-content/50">
+              <FiSearch className="w-12 h-12 mb-4 opacity-50" />
+              <p className="text-lg font-medium">No services found.</p>
+              <p className="text-sm">
+                Try adjusting your filters or search term.
+              </p>
+            </div>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center gap-2 mt-8">
+              <button
+                className="btn btn-sm btn-outline rounded-full"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              >
+                Prev
+              </button>
+
+              <div className="flex gap-1">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (page) => (
+                    <button
+                      key={page}
+                      className={`btn btn-sm rounded-full w-10 ${currentPage === page ? "btn-primary text-white bg-linear-to-br from-[#26003b] to-[#b71056] border-0" : "btn-ghost border border-base-300"}`}
+                      onClick={() => setCurrentPage(page)}
+                    >
+                      {page}
+                    </button>
+                  ),
+                )}
+              </div>
+
+              <button
+                className="btn btn-sm btn-outline rounded-full"
+                disabled={currentPage === totalPages}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
+              >
+                Next
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
 </file>
 
 <file path="app/(public)/layout.tsx">
@@ -533,34 +710,201 @@ export default function PublicLayout({
 }
 </file>
 
-<file path="app/(public)/page.tsx">
-// We will build these next:
-// import TrendingServices from "./_components/home/TrendingServices";
-// import WhyChooseUs from "./_components/home/WhyChooseUs";
-// import HowItWorks from "./_components/home/HowItWorks";
-// import CtaSection from "./_components/home/CtaSection";
-// import Footer from "./_components/home/Footer";
+<file path="app/(public)/services/[id]/page.tsx">
+import Image from "next/image";
+import Link from "next/link";
+import {
+  FiStar,
+  FiClock,
+  FiCheckCircle,
+  FiMessageSquare,
+} from "react-icons/fi";
+import { servicesData } from "@/lib/data";
 
-import CategorySection from "./_components/CategorySection";
-import HeroSection from "./_components/HeroSection";
-import StatsSection from "./_components/StatsSection";
+import { notFound } from "next/navigation";
+import ServiceCard from "@/Components/ServiceLoop/ServiceLoop";
 
-export default function Home() {
+export default async function ServiceDetailsPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  // Await params in Next.js App Router
+  const { id } = await params;
+
+  // Find the specific service using the static data
+  const service = servicesData.find((s) => s.id.toString() === id);
+
+  if (!service) {
+    notFound();
+  }
+
+  // Get related items (same category, exclude current)
+  const relatedServices = servicesData
+    .filter((s) => s.category === service.category && s.id !== service.id)
+    .slice(0, 3);
+
   return (
-    <main className="flex flex-col min-h-screen bg-base-100 text-base-content w-full overflow-x-hidden">
-      {/* Navbar will go in layout or top of here if not already global */}
+    <div className="w-full bg-base-100 min-h-screen py-10 px-6">
+      <div className="max-w-7xl mx-auto">
+        {/* Top Header Section */}
+        <div className="mb-8">
+          <div className="text-sm text-primary font-semibold mb-2">
+            {service.category}
+          </div>
+          <h1 className="text-3xl lg:text-5xl font-bold text-base-content mb-4">
+            {service.title}
+          </h1>
+          <div className="flex flex-wrap items-center gap-4 text-base-content/80">
+            <div className="flex items-center gap-2">
+              <Image
+                src={`https://ui-avatars.com/api/?name=${encodeURIComponent(service.author)}&background=random&color=fff`}
+                alt={service.author}
+                width={30}
+                height={30}
+                className="rounded-full"
+              />
+              <span className="font-medium">{service.author}</span>
+            </div>
+            <div className="flex items-center gap-1 text-orange-500 font-semibold">
+              <FiStar className="fill-current" />
+              <span>{service.rating}</span>
+              <span className="text-base-content/50 font-normal">
+                ({service.reviews} reviews)
+              </span>
+            </div>
+          </div>
+        </div>
 
-      <HeroSection />
-      <StatsSection />
-      <CategorySection />
+        {/* Main Grid Layout */}
+        <div className="grid lg:grid-cols-3 gap-10">
+          {/* Left Column (Main Content) */}
+          <div className="lg:col-span-2 space-y-10">
+            {/* Image Gallery */}
+            <div className="relative w-full h-100 lg:h-125 bg-base-200 rounded-3xl overflow-hidden border border-base-300">
+              <Image
+                src="/Hero-image.webp"
+                alt={service.title}
+                fill
+                className="object-cover"
+              />
+            </div>
 
-      {/* <TrendingServices />
-      <WhyChooseUs />
-      <HowItWorks />
-      <CtaSection />
-      <Footer /> 
-      */}
-    </main>
+            {/* Description Section */}
+            <section className="bg-base-200/50 p-8 rounded-3xl border border-base-300">
+              <h2 className="text-2xl font-bold text-base-content mb-4">
+                About this service
+              </h2>
+              <p className="text-base-content/80 leading-relaxed">
+                {service.description} We bring years of experience to ensure
+                your project is completed with the highest quality standards.
+                This service is tailored to meet modern industry requirements,
+                providing you with a scalable and robust solution.
+              </p>
+            </section>
+
+            {/* Specifications Section */}
+            <section>
+              <h2 className="text-2xl font-bold text-base-content mb-4">
+                Key Specifications
+              </h2>
+              <div className="grid sm:grid-cols-2 gap-4">
+                {[
+                  "High Quality Output",
+                  "Source Files Included",
+                  "Commercial Use",
+                  "Revisions Provided",
+                ].map((spec, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center gap-2 text-base-content/80"
+                  >
+                    <FiCheckCircle className="text-primary" />
+                    <span>{spec}</span>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Reviews Section */}
+            <section className="border-t border-base-300 pt-10">
+              <h2 className="text-2xl font-bold text-base-content mb-6">
+                Client Reviews
+              </h2>
+              <div className="space-y-6">
+                {/* Dummy Review */}
+                <div className="bg-base-200 p-6 rounded-2xl border border-base-300">
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary font-bold">
+                      J
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-base-content">John Doe</h4>
+                      <div className="flex text-orange-500 text-sm">
+                        <FiStar className="fill-current" />
+                        <FiStar className="fill-current" />
+                        <FiStar className="fill-current" />
+                        <FiStar className="fill-current" />
+                        <FiStar className="fill-current" />
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-base-content/70 italic">
+                    &quot;Absolutely fantastic work. Delivered on time and
+                    exceeded my expectations!&quot;
+                  </p>
+                </div>
+              </div>
+            </section>
+          </div>
+
+          {/* Right Column (Sticky Pricing Card) */}
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 bg-base-100 rounded-3xl border border-base-300 shadow-xl p-6">
+              <div className="flex justify-between items-center mb-6 border-b border-base-200 pb-4">
+                <span className="text-xl font-bold text-base-content">
+                  Standard Package
+                </span>
+                <span className="text-3xl font-bold text-primary">
+                  ${service.price}
+                </span>
+              </div>
+
+              <p className="text-base-content/70 mb-6">
+                Complete delivery including all source files and 3 rounds of
+                revisions.
+              </p>
+
+              <div className="flex items-center gap-2 text-base-content font-medium mb-8">
+                <FiClock className="text-primary w-5 h-5" />
+                <span>{service.delivery} Delivery</span>
+              </div>
+
+              <button className="btn btn-primary w-full rounded-full text-white bg-linear-to-br from-[#26003b] to-[#b71056] border-0 mb-3 btn-lg">
+                Continue (${service.price})
+              </button>
+              <button className="btn btn-outline w-full rounded-full">
+                <FiMessageSquare className="mr-2" /> Contact Seller
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Related Items Section */}
+        {relatedServices.length > 0 && (
+          <div className="mt-20 pt-10 border-t border-base-300">
+            <h2 className="text-2xl font-bold text-base-content mb-8">
+              Related Services
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {relatedServices.map((related) => (
+                <ServiceCard key={related.id} service={related} />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 </file>
@@ -611,6 +955,76 @@ export const POST = async (req: Request) => {
     });
   }
 };
+</file>
+
+<file path="app/api/seed/route.ts">
+import { NextResponse } from "next/server";
+import { dbConnect } from "@/lib/dbConnect";
+import Service from "@/models/Service";
+import Category from "@/models/Category";
+import User from "@/models/User";
+import { servicesData } from "@/lib/data";
+
+export async function GET() {
+  try {
+    await dbConnect();
+
+    await Service.deleteMany({});
+    await Category.deleteMany({});
+
+    let demoSeller = await User.findOne({ email: "seller@demo.com" });
+    if (!demoSeller) {
+      demoSeller = await User.create({
+        name: "Demo Seller",
+        email: "seller@demo.com",
+        password: "hashedpassword123", // Using the same dummy password
+        role: "seller",
+        image:
+          "https://ui-avatars.com/api/?name=Demo+Seller&background=random&color=fff",
+      });
+    }
+
+    const uniqueCategories = Array.from(
+      new Set(servicesData.map((s) => s.category)),
+    );
+    const categoryDocs = await Promise.all(
+      uniqueCategories.map((cat) =>
+        Category.create({
+          name: cat,
+          slug: cat.toLowerCase().replace(/ /g, "-"),
+        }),
+      ),
+    );
+
+    const categoryMap = categoryDocs.reduce(
+      (acc, doc) => {
+        acc[doc.name] = doc._id;
+        return acc;
+      },
+      {} as Record<string, any>,
+    );
+
+    const seedData = servicesData.map(({ id, category, author, ...rest }) => ({
+      ...rest,
+      category: categoryMap[category],
+      author: demoSeller._id,
+    }));
+
+    // 5. Insert Services
+    await Service.insertMany(seedData);
+
+    return NextResponse.json({
+      success: true,
+      message: "Database seeded with dynamic references successfully!",
+    });
+  } catch (error) {
+    console.error("Seeding error:", error);
+    return NextResponse.json(
+      { error: "Failed to seed database" },
+      { status: 500 },
+    );
+  }
+}
 </file>
 
 <file path="app/api/test-db/route.ts">
@@ -874,6 +1288,100 @@ const NavLink = ({ href, children, className = '' }) => {
 export default NavLink;
 </file>
 
+<file path="Components/ServiceLoop/ServiceLoop.tsx">
+import Image from "next/image";
+import Link from "next/link";
+import { FiStar, FiClock } from "react-icons/fi";
+
+export interface ServiceType {
+  id: number | string;
+  title: string;
+  description: string;
+  category?: string;
+  author: string;
+  rating: number | string;
+  reviews: number;
+  price: number | string;
+  delivery: string;
+}
+
+const ServiceCard = ({ service }: { service: ServiceType }) => {
+  return (
+    <div className="group flex flex-col bg-base-100 rounded-2xl border border-base-300 overflow-hidden hover:shadow-xl hover:border-primary/50 transition-all duration-300">
+      {/* Thumbnail */}
+      <div className="relative w-full h-48 bg-base-200 overflow-hidden">
+        <Image
+          src="/Hero-image.webp"
+          alt={service.title}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+      </div>
+
+      {/* Content */}
+      <div className="p-5 flex flex-col flex-1">
+        <div className="flex items-center gap-2 mb-3">
+          <Image
+            src={`https://ui-avatars.com/api/?name=${encodeURIComponent(
+              service.author,
+            )}&background=random&color=fff`}
+            alt={service.author}
+            width={24}
+            height={24}
+            className="rounded-full"
+          />
+          <span className="text-sm font-medium text-base-content/80">
+            {service.author}
+          </span>
+        </div>
+
+        <h3 className="font-bold text-lg text-base-content mb-2 line-clamp-1 group-hover:text-primary transition-colors">
+          <Link href={`/services/${service.id}`}>{service.title}</Link>
+        </h3>
+        <p className="text-sm text-base-content/70 line-clamp-2 mb-4 flex-1">
+          {service.description}
+        </p>
+
+        {/* Meta Info */}
+        <div className="flex items-center justify-between text-sm text-base-content/80 mb-4 pt-4 border-t border-base-200">
+          <div className="flex items-center gap-1 text-orange-500 font-semibold">
+            <FiStar className="fill-current" />
+            <span>{service.rating}</span>
+            <span className="text-base-content/50 font-normal">
+              ({service.reviews})
+            </span>
+          </div>
+          <div className="flex items-center gap-1">
+            <FiClock />
+            <span>{service.delivery}</span>
+          </div>
+        </div>
+
+        {/* Footer / Price / CTA */}
+        <div className="flex items-center justify-between mt-auto">
+          <div>
+            <span className="text-xs text-base-content/60 block">
+              Starting at
+            </span>
+            <span className="text-lg font-bold text-base-content">
+              ${service.price}
+            </span>
+          </div>
+          <Link
+            href={`/services/${service.id}`}
+            className="btn btn-sm btn-primary rounded-full text-white bg-linear-to-br from-[#26003b] to-[#b71056] border-0"
+          >
+            View Details
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default ServiceCard;
+</file>
+
 <file path="Components/SessionWrapper/SessionWrapper.tsx">
 "use client";
 import { SessionProvider } from "next-auth/react";
@@ -957,6 +1465,143 @@ const eslintConfig = defineConfig([
 ]);
 
 export default eslintConfig;
+</file>
+
+<file path="hooks/useDebounce.ts">
+import { useState, useEffect } from "react";
+
+export function useDebounce<T>(value: T, delay: number): T {
+  const [debouncedValue, setDebouncedValue] = useState<T>(value);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedValue(value);
+    }, delay);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [value, delay]);
+
+  return debouncedValue;
+}
+</file>
+
+<file path="lib/data.ts">
+export const servicesData = [
+  {
+    id: 1,
+    title: "Full-Stack Web Development",
+    description:
+      "Custom built, responsive, and SEO-optimized web applications using Next.js and Tailwind.",
+    category: "Development",
+    author: "Alex Morgan",
+    rating: 4.9,
+    reviews: 124,
+    price: 500,
+    delivery: "7 days",
+    image:
+      "https://images.pexels.com/photos/38639/mockup-psd-ipad-iphone-38639.jpeg?cs=srgb&dl=pexels-pixabay-38639.jpg&fm=jpg&w=1280&h=1050&_gl=1*c8nvtv*_ga*MTI4MTc0ODA2MS4xNzc4ODU4Mjcx*_ga_8JE65Q40S6*czE3ODI0NzQ3NTgkbzEzJGcxJHQxNzgyNDc0NzcxJGo0NyRsMCRoMA..",
+  },
+  {
+    id: 2,
+    title: "Brand Identity & Logo Design",
+    description:
+      "Professional and modern brand identity packages including logos and guidelines.",
+    category: "Design",
+    author: "Sarah Chen",
+    rating: 5.0,
+    reviews: 89,
+    price: 250,
+    delivery: "3 days",
+    image:
+      "https://images.pexels.com/photos/7598019/pexels-photo-7598019.jpeg?cs=srgb&dl=pexels-leeloothefirst-7598019.jpg&fm=jpg&w=1280&h=1050&_gl=1*ftqe5p*_ga*MTI4MTc0ODA2MS4xNzc4ODU4Mjcx*_ga_8JE65Q40S6*czE3ODI0NzQ3NTgkbzEzJGcxJHQxNzgyNDc0ODE2JGoyJGwwJGgw",
+  },
+  {
+    id: 3,
+    title: "Advanced Technical SEO",
+    description:
+      "Comprehensive site audits, keyword strategies, and indexing optimization.",
+    category: "Marketing",
+    author: "David Kumar",
+    rating: 4.8,
+    reviews: 210,
+    price: 300,
+    delivery: "5 days",
+    image:
+      "https://images.pexels.com/photos/7876379/pexels-photo-7876379.jpeg?cs=srgb&dl=pexels-karola-g-7876379.jpg&fm=jpg&w=1280&h=1050&_gl=1*mrcs6s*_ga*MTI4MTc0ODA2MS4xNzc4ODU4Mjcx*_ga_8JE65Q40S6*czE3ODI0NzQ3NTgkbzEzJGcxJHQxNzgyNDc0ODM4JGo1MSRsMCRoMA..",
+  },
+  {
+    id: 4,
+    title: "UI/UX Mobile App Design",
+    description:
+      "High-fidelity Figma prototypes and user flows for iOS and Android applications.",
+    category: "Design",
+    author: "Elena Rodriguez",
+    rating: 4.9,
+    reviews: 156,
+    price: 400,
+    delivery: "10 days",
+    image:
+      "https://images.pexels.com/photos/54284/pexels-photo-54284.jpeg?cs=srgb&dl=pexels-tdcat-54284.jpg&fm=jpg&w=1280&h=1050&_gl=1*vkw3af*_ga*MTI4MTc0ODA2MS4xNzc4ODU4Mjcx*_ga_8JE65Q40S6*czE3ODI0NzQ3NTgkbzEzJGcxJHQxNzgyNDc0OTEyJGozOCRsMCRoMA..",
+  },
+  {
+    id: 5,
+    title: "E-Commerce Integration",
+    description:
+      "Secure payment gateways and product management systems for online stores.",
+    category: "Development",
+    author: "James Wilson",
+    rating: 4.7,
+    reviews: 92,
+    price: 600,
+    delivery: "14 days",
+    image:
+      "https://images.pexels.com/photos/7191166/pexels-photo-7191166.jpeg?cs=srgb&dl=pexels-pavel-danilyuk-7191166.jpg&fm=jpg&w=1280&h=1050&_gl=1*lzxlxm*_ga*MTI4MTc0ODA2MS4xNzc4ODU4Mjcx*_ga_8JE65Q40S6*czE3ODI0NzQ3NTgkbzEzJGcxJHQxNzgyNDc0OTM3JGoxMyRsMCRoMA..",
+  },
+  {
+    id: 6,
+    title: "Social Media Campaign Management",
+    description:
+      "Targeted ad campaigns and content creation for modern social platforms.",
+    category: "Marketing",
+    author: "Chloe Adams",
+    rating: 4.6,
+    reviews: 45,
+    price: 150,
+    delivery: "7 days",
+    image:
+      "https://images.pexels.com/photos/4565777/pexels-photo-4565777.jpeg?cs=srgb&dl=pexels-plann-2999237-4565777.jpg&fm=jpg&w=1280&h=1050&_gl=1*t9erj4*_ga*MTI4MTc0ODA2MS4xNzc4ODU4Mjcx*_ga_8JE65Q40S6*czE3ODI0NzQ3NTgkbzEzJGcxJHQxNzgyNDc0OTY0JGo0OCRsMCRoMA..",
+  },
+  {
+    id: 7,
+    title: "Custom WordPress Theme",
+    description:
+      "Pixel-perfect WordPress theme development from your design files.",
+    category: "Development",
+    author: "Michael Chang",
+    rating: 4.8,
+    reviews: 112,
+    price: 350,
+    delivery: "5 days",
+    image:
+      "https://images.pexels.com/photos/265667/pexels-photo-265667.jpeg?cs=srgb&dl=pexels-pixabay-265667.jpg&fm=jpg&w=1280&h=1050&_gl=1*1c9cxlj*_ga*MTI4MTc0ODA2MS4xNzc4ODU4Mjcx*_ga_8JE65Q40S6*czE3ODI0NzQ3NTgkbzEzJGcxJHQxNzgyNDc1MDEyJGo2MCRsMCRoMA..",
+  },
+  {
+    id: 8,
+    title: "Explainer Video Animation",
+    description:
+      "Engaging 60-second 2D animated explainer videos with voiceover.",
+    category: "Video",
+    author: "Lisa Taylor",
+    rating: 5.0,
+    reviews: 67,
+    price: 450,
+    delivery: "7 days",
+    image:
+      "https://images.pexels.com/photos/28655002/pexels-photo-28655002.jpeg?cs=srgb&dl=pexels-jakeheinemann-28655002.jpg&fm=jpg&w=1280&h=1050&_gl=1*10ctqwn*_ga*MTI4MTc0ODA2MS4xNzc4ODU4Mjcx*_ga_8JE65Q40S6*czE3ODI0NzQ3NTgkbzEzJGcxJHQxNzgyNDc1MDMxJGo0MSRsMCRoMA..",
+  },
+];
 </file>
 
 <file path="lib/dbConnect.ts">
@@ -1051,6 +1696,40 @@ const accountSchema = new mongoose.Schema({
 
 export const Account =
   mongoose.models.Account || mongoose.model("Account", accountSchema);
+</file>
+
+<file path="models/Service.ts">
+import mongoose from "mongoose";
+
+const ServiceSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    // Dynamic reference to Category
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+    // Dynamic reference to User
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    image: { type: String, default: "/Hero-image.webp" },
+    rating: { type: Number, default: 0 },
+    reviews: { type: Number, default: 0 },
+    price: { type: Number, required: true },
+    delivery: { type: String, required: true },
+  },
+  { timestamps: true },
+);
+
+const Service =
+  mongoose.models.Service || mongoose.model("Service", ServiceSchema);
+
+export default Service;
 </file>
 
 <file path="models/Session.ts">
@@ -1404,6 +2083,23 @@ If you found this template helpful, please consider:
 - [bcryptjs](https://www.npmjs.com/package/bcryptjs) - Password hashing library
 </file>
 
+<file path="tailwind.config.ts">
+/** @type {import('tailwindcss').Config} */
+
+module.exports = {
+  content: [
+    "./app/**/*.{js,ts,jsx,tsx,mdx}", // For Next.js App Router
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}", // For Next.js Pages Router
+    "./components/**/*.{js,ts,jsx,tsx,mdx}", // For your global components
+    "./src/**/*.{js,ts,jsx,tsx,mdx}", // If you are using a /src directory
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [require("daisyui")],
+};
+</file>
+
 <file path="tsconfig.json">
 {
   "compilerOptions": {
@@ -1438,6 +2134,475 @@ If you found this template helpful, please consider:
     "**/*.mts"
   ],
   "exclude": ["node_modules"]
+}
+</file>
+
+<file path="app/(public)/_components/CategorySection.tsx">
+import Link from "next/link";
+import {
+  FiMonitor,
+  FiPenTool,
+  FiTrendingUp,
+  FiVideo,
+  FiMusic,
+  FiCode,
+} from "react-icons/fi";
+
+const CategorySection = () => {
+  const categories = [
+    { icon: FiMonitor, name: "Development & IT", count: "1,234 skills" },
+    { icon: FiPenTool, name: "Design & Creative", count: "842 skills" },
+    { icon: FiTrendingUp, name: "Digital Marketing", count: "354 skills" },
+    { icon: FiVideo, name: "Video & Animation", count: "299 skills" },
+    { icon: FiMusic, name: "Music & Audio", count: "185 skills" },
+    { icon: FiCode, name: "Programming & Tech", count: "945 skills" },
+  ];
+
+  return (
+    <section className="w-full bg-base-200 py-20 px-6">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-end mb-10">
+          <div>
+            <h2 className="text-3xl font-bold text-base-content mb-2">
+              Browse by category
+            </h2>
+            <p className="text-base-content/70">
+              Find the specific talent you need to accelerate your business.
+            </p>
+          </div>
+          <Link
+            href="/explore"
+            className="btn btn-outline hidden md:flex rounded-full"
+          >
+            All Categories
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
+          {categories.map((cat, index) => {
+            const Icon = cat.icon;
+            return (
+              <div
+                key={index}
+                className="bg-base-100 p-6 rounded-2xl shadow-sm border border-base-300 hover:border-primary hover:shadow-md transition-all cursor-pointer group flex flex-col items-center text-center"
+              >
+                <div className="w-14 h-14 rounded-full bg-base-200 group-hover:bg-primary/10 flex items-center justify-center mb-4 transition-colors">
+                  <Icon className="w-6 h-6 text-base-content group-hover:text-primary" />
+                </div>
+                <h3 className="font-semibold text-base-content mb-1">
+                  {cat.name}
+                </h3>
+                <p className="text-xs text-base-content/60">{cat.count}</p>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default CategorySection;
+</file>
+
+<file path="app/(public)/_components/Footer.tsx">
+import Image from "next/image";
+import Link from "next/link";
+import { FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa";
+
+const Footer = () => {
+  return (
+    <footer className="w-full bg-base-200 border-t border-base-300 pt-16 pb-8 px-6 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 footer text-base-content">
+        <aside className="max-w-xs space-y-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/nexus-directory-favico.png"
+              alt="Nexus Directory"
+              width={24}
+              height={24}
+              className="object-contain"
+            />
+            <span className="text-2xl font-semibold">NEXUS</span>
+          </Link>
+          <p className="text-base-content/70 text-sm">
+            Nexus Directory Ltd.
+            <br />
+            Connecting businesses with top-tier professionals seamlessly since
+            2026.
+          </p>
+          <div className="flex gap-4 mt-4">
+            <a
+              href="#"
+              className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center hover:bg-primary hover:text-white transition-all cursor-pointer"
+            >
+              <FaLinkedinIn />
+            </a>
+            <a
+              href="#"
+              className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center hover:bg-primary hover:text-white transition-all cursor-pointer"
+            >
+              <FaGithub />
+            </a>
+            <a
+              href="#"
+              className="w-10 h-10 rounded-full bg-base-300 flex items-center justify-center hover:bg-primary hover:text-white transition-all cursor-pointer"
+            >
+              <FaFacebookF />
+            </a>
+          </div>
+        </aside>
+
+        <nav>
+          <h6 className="footer-title text-base-content">Services</h6>
+          <Link href="#" className="link link-hover text-base-content/70">
+            Web Development
+          </Link>
+          <Link href="#" className="link link-hover text-base-content/70">
+            Design & Branding
+          </Link>
+          <Link href="#" className="link link-hover text-base-content/70">
+            Digital Marketing
+          </Link>
+          <Link href="#" className="link link-hover text-base-content/70">
+            SEO Optimization
+          </Link>
+        </nav>
+        <nav>
+          <h6 className="footer-title text-base-content">Company</h6>
+          <Link href="#" className="link link-hover text-base-content/70">
+            About us
+          </Link>
+          <Link href="#" className="link link-hover text-base-content/70">
+            Contact
+          </Link>
+          <Link href="#" className="link link-hover text-base-content/70">
+            Jobs
+          </Link>
+          <Link href="#" className="link link-hover text-base-content/70">
+            Press kit
+          </Link>
+        </nav>
+        <nav>
+          <h6 className="footer-title text-base-content">Legal</h6>
+          <Link href="#" className="link link-hover text-base-content/70">
+            Terms of use
+          </Link>
+          <Link href="#" className="link link-hover text-base-content/70">
+            Privacy policy
+          </Link>
+          <Link href="#" className="link link-hover text-base-content/70">
+            Cookie policy
+          </Link>
+        </nav>
+      </div>
+
+      <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-base-300 text-center text-sm text-base-content/50">
+        <p>
+          © {new Date().getFullYear()} Nexus Directory. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  );
+};
+
+export default Footer;
+</file>
+
+<file path="app/(public)/_components/HeroSection.tsx">
+import Image from "next/image";
+import Link from "next/link";
+import { FiSearch } from "react-icons/fi";
+import { IoRibbonOutline } from "react-icons/io5";
+import { LuShieldCheck } from "react-icons/lu";
+
+const HeroSection = () => {
+  return (
+    <section className="w-full bg-base-100 pt-20 pb-16 lg:pt-32 lg:pb-40 px-6">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-12 items-stretch justify-between">
+        {/* Left Content */}
+        <div className="space-y-8 lg:w-150 w-full z-10">
+          <div className="inline-block px-4 py-1.5 rounded-full bg-primary/10 text-primary font-semibold text-sm">
+            Top Rated Directory Platform
+          </div>
+          <h1 className="text-4xl lg:text-6xl font-bold leading-tight text-base-content">
+            Find the perfect <span className="text-primary">professionals</span>{" "}
+            for your next big project.
+          </h1>
+          <p className="text-lg text-base-content/70 max-w-xl">
+            Connect with top-tier agencies, vetted freelancers, and expert
+            consultants ready to elevate your business.
+          </p>
+
+          {/* Search Bar matching the Freeio template */}
+          <div className="bg-base-200 p-2 rounded-full shadow-lg shadow-base-300 flex items-center max-w-lg border border-base-300">
+            <FiSearch className="text-base-content/50 ml-4 w-5 h-5 text0-lg" />
+            <input
+              type="text"
+              placeholder="What service are you looking for?"
+              className="bg-transparent border-none outline-none px-4 py-3 w-full text-base-content placeholder:text-base-content/50 placeholder:text-sm md:placeholder:text-normal"
+            />
+            <button className="btn btn-primary rounded-full md:px-8 px-4">
+              Search
+            </button>
+          </div>
+
+          <div className="flex items-center gap-4 text-sm font-medium text-base-content/60 pt-4">
+            <span>Popular:</span>
+            <Link href="#" className="hover:text-primary transition-colors">
+              Web Design
+            </Link>
+            <Link href="#" className="hover:text-primary transition-colors">
+              SEO
+            </Link>
+            <Link href="#" className="hover:text-primary transition-colors">
+              Marketing
+            </Link>
+          </div>
+        </div>
+
+        {/* Right Image/Illustration Area */}
+        <div className="relative lg:w-120 w-full lg:block rounded-3xl">
+          <Image
+            src="/Hero-image.webp"
+            alt="Hero Image"
+            width={900}
+            height={700}
+            className="aspect-square block w-full h-full object-cover rounded-3xl"
+          />
+
+          {/* Floating badge to match template vibes */}
+          <div className="py-4 px-8 absolute md:-bottom-20 bottom-10 -left-5 bg-base-100  rounded-xl shadow-xl border border-base-300 flex items-center gap-3">
+            <div className="md:w-14 md:h-14 w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-600 md:text-2xl text-lg">
+              <IoRibbonOutline />
+            </div>
+            <div>
+              <p className="font-bold md:text-lg text-normal text-base-content/80">
+                Verified Experts
+              </p>
+              <p className="text-normal text-base-content/60">
+                Quality guaranteed
+              </p>
+            </div>
+          </div>
+          <div className="py-4 px-8 absolute bottom-20 -right-5 bg-base-100  rounded-xl shadow-xl border border-base-300 md:flex hidden items-center gap-3">
+            <div className="md:w-14 md:h-14 w-8 h-8 rounded-full bg-slate-200 flex items-center justify-center text-slate-600 md:text-2xl text-lg">
+              <LuShieldCheck />
+            </div>
+            <div>
+              <p className="font-bold md:text-lg text-normal text-base-content/80">
+                Safe & Secure
+              </p>
+              <p className="text-normal text-base-content/60">
+                Your privacy, our responsibility
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+export default HeroSection;
+</file>
+
+<file path="app/(public)/_components/Navbar.tsx">
+"use client";
+import Link from "next/link";
+import Image from "next/image";
+import { useState } from "react";
+import { FiMenu, FiX } from "react-icons/fi";
+import NavLink from "@/Components/NavLink/NavLink";
+
+const Navbar = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // ১. একটি কমন হ্যান্ডলার যা ক্লিক হওয়া মাত্রই মোবাইল মেনু বন্ধ করে দেবে
+  const handleMobileMenuClick = () => {
+    // আপনি চাইলে এখানে কন্ডিশন রাখতে পারেন, তবে যেহেতু ভেতরে সব কিছুতেই ক্লিক করলে মেনু বন্ধ হওয়া দরকার, তাই সরাসরি:
+    setMenuOpen(false);
+  };
+
+  // Reusable classes for desktop and mobile links to ensure consistent active states
+  const desktopLinkClass =
+    "px-3 py-2 rounded-md hover:text-primary transition-colors [&.active]:bg-primary/10 [&.active]:text-primary [&.active]:font-semibold";
+  const mobileLinkClass =
+    "p-3 rounded-lg text-lg hover:bg-base-200 transition-colors [&.active]:bg-primary/10 [&.active]:text-primary [&.active]:font-semibold";
+
+  return (
+    <>
+      <header className="navbar bg-base-100 sticky top-0 z-50 px-4 lg:px-8 py-3 border-b border-base-300 transition-colors duration-300 justify-between">
+        <div className="flex items-center">
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/nexus-directory-favico.png"
+              alt="Nexus Directory"
+              width={24}
+              height={24}
+              className="object-contain"
+            />
+            <span className="text-2xl font-semibold">NEXUS</span>
+          </Link>
+        </div>
+
+        {/* Desktop Menu */}
+        <div className="hidden lg:flex items-center gap-2 font-medium text-base-content/80">
+          <NavLink href="/" className={desktopLinkClass}>
+            Home
+          </NavLink>
+          <NavLink href="/explore" className={desktopLinkClass}>
+            Explore
+          </NavLink>
+          <NavLink href="/about" className={desktopLinkClass}>
+            About
+          </NavLink>
+        </div>
+
+        {/* Desktop Button */}
+        <div className="hidden lg:flex">
+          <Link
+            href="/login"
+            className="btn btn-primary rounded-full px-8 text-white bg-linear-to-br from-[#26003b] to-[#b71056] border-0 hover:scale-105 transition-transform"
+          >
+            Sign In
+          </Link>
+        </div>
+
+        {/* Mobile Hamburger Toggle */}
+        <div className="lg:hidden flex items-center">
+          <button
+            onClick={() => setMenuOpen(true)}
+            className="text-3xl text-base-content p-2"
+          >
+            <FiMenu />
+          </button>
+        </div>
+      </header>
+
+      {/* --- Mobile Offcanvas Menu --- */}
+
+      {/* 1. Dark Overlay */}
+      <div
+        className={`fixed inset-0 bg-black/60 z-100 transition-opacity duration-300 lg:hidden ${
+          menuOpen ? "opacity-100 visible" : "opacity-0 invisible"
+        }`}
+        onClick={() => setMenuOpen(false)}
+      ></div>
+
+      {/* 2. Sidebar Panel */}
+      {/* ২. এখানে মূল প্যারেন্ট কন্টেইনারে একটিমাত্র onClick যুক্ত করা হয়েছে (Event Delegation) */}
+      <div
+        onClick={handleMobileMenuClick}
+        className={`fixed top-0 right-0 h-full w-4/5 max-w-sm bg-base-100 z-101 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col lg:hidden ${
+          menuOpen ? "translate-x-0" : "translate-x-full"
+        }`}
+      >
+        {/* Top: Logo & Close Button */}
+        <div className="flex justify-between items-center p-5 border-b border-base-300">
+          <Image
+            src="/nexus-directory-logo.png"
+            alt="Nexus Directory"
+            width={130}
+            height={40}
+            className="object-contain"
+          />
+          <button className="text-3xl text-base-content/70 hover:text-primary transition-colors">
+            <FiX />
+          </button>
+        </div>
+
+        {/* Middle: Navigation Links */}
+        {/* ৩. সবগুলো আইটেম থেকে আলাদা আলাদা onClick মুছে ফেলা হয়েছে */}
+        <div className="flex flex-col flex-1 overflow-y-auto p-5 gap-2 text-base-content font-medium">
+          <NavLink href="/" className={mobileLinkClass}>
+            Home
+          </NavLink>
+          <NavLink href="/explore" className={mobileLinkClass}>
+            Explore
+          </NavLink>
+          <NavLink href="/about" className={mobileLinkClass}>
+            About
+          </NavLink>
+        </div>
+
+        {/* Bottom: Sign In Button */}
+        <div className="p-5 border-t border-base-300 bg-base-200/50">
+          <Link
+            href="/login"
+            className="btn btn-primary w-full rounded-full text-white bg-linear-to-br from-[#26003b] to-[#b71056] border-0 text-lg"
+          >
+            Sign In
+          </Link>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default Navbar;
+</file>
+
+<file path="app/(public)/_components/StatsSection.tsx">
+const StatsSection = () => {
+  const stats = [
+    { value: "834M", label: "Total Freelancers" },
+    { value: "732M", label: "Positive Reviews" },
+    { value: "90M", label: "Order Received" },
+    { value: "236M", label: "Projects Completed" },
+  ];
+
+  return (
+    <section className="w-full bg-primary py-12 px-6">
+      <div className="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-8 md:divide-x  divide-white/20">
+        {stats.map((stat, index) => (
+          <div
+            key={index}
+            className="flex flex-col items-center justify-center text-center px-4"
+          >
+            <h3 className="text-3xl lg:text-5xl font-bold text-white mb-2">
+              {stat.value}
+            </h3>
+            <p className="text-white/80 text-sm lg:text-base font-medium">
+              {stat.label}
+            </p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+};
+
+export default StatsSection;
+</file>
+
+<file path="app/(public)/page.tsx">
+// import TrendingServices from "./_components/home/TrendingServices";
+// import CtaSection from "./_components/home/CtaSection";
+// import Footer from "./_components/home/Footer";
+
+import CategorySection from "./_components/CategorySection";
+import CtaSection from "./_components/CtaSection";
+import HeroSection from "./_components/HeroSection";
+import HowItWorks from "./_components/HowItWorks";
+import StatsSection from "./_components/StatsSection";
+import TrendingServices from "./_components/TrendingServices";
+import WhyChooseUs from "./_components/WhyChooseUs";
+
+export default function Home() {
+  return (
+    <main className="flex flex-col min-h-screen bg-base-100 text-base-content w-full overflow-x-hidden">
+      {/* Navbar will go in layout or top of here if not already global */}
+
+      <HeroSection />
+      <StatsSection />
+      <CategorySection />
+      <TrendingServices />
+      <WhyChooseUs />
+      <HowItWorks />
+      <CtaSection />
+    </main>
+  );
 }
 </file>
 
@@ -2155,46 +3320,6 @@ export default nextConfig;
 } */
 </file>
 
-<file path="app/layout.tsx">
-import type { Metadata } from "next";
-import { Figtree, Inter } from "next/font/google";
-import "./globals.css";
-import { ToasterProvider } from "@/Components/ToasterProvider";
-import SessionWrapper from "@/Components/SessionWrapper/SessionWrapper";
-import ThemeToggle from "@/Components/ThemeToggle";
-
-const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter", // CSS variable name
-});
-
-export const metadata: Metadata = {
-  title: "Nextus Directory",
-  description: "Built with love",
-};
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
-  return (
-    <html
-      lang="en"
-      className={`${figtree.variable} ${inter.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col bg-base-100 text-base-content transition-colors duration-300">
-        <ToasterProvider />
-        <SessionWrapper>{children}</SessionWrapper>
-        {/* Floating Theme Toggle */}
-        <ThemeToggle />
-      </body>
-    </html>
-  );
-}
-</file>
-
 <file path="app/login/_components/LoginForm.tsx">
 "use client";
 import { signIn } from "next-auth/react";
@@ -2332,6 +3457,46 @@ const LoginForm = () => {
 };
 
 export default LoginForm;
+</file>
+
+<file path="app/layout.tsx">
+import type { Metadata } from "next";
+import { Figtree, Inter } from "next/font/google";
+import "./globals.css";
+import { ToasterProvider } from "@/Components/ToasterProvider";
+import SessionWrapper from "@/Components/SessionWrapper/SessionWrapper";
+import ThemeToggle from "@/Components/ThemeToggle";
+
+const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter", // CSS variable name
+});
+
+export const metadata: Metadata = {
+  title: "Nextus Directory",
+  description: "Built with love",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html
+      lang="en"
+      className={`${figtree.variable} ${inter.variable} h-full antialiased`}
+    >
+      <body className="min-h-full flex flex-col bg-base-100 text-base-content transition-colors duration-300">
+        <ToasterProvider />
+        <SessionWrapper>{children}</SessionWrapper>
+        {/* Floating Theme Toggle */}
+        <ThemeToggle />
+      </body>
+    </html>
+  );
+}
 </file>
 
 </files>

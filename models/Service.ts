@@ -4,9 +4,19 @@ const ServiceSchema = new mongoose.Schema(
   {
     title: { type: String, required: true },
     description: { type: String, required: true },
-    category: { type: String, required: true },
-    author: { type: String, required: true },
-    image: { type: String, default: "/Hero-image.webp" }, // Added image field with default
+    // Dynamic reference to Category
+    category: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Category",
+      required: true,
+    },
+    // Dynamic reference to User
+    author: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    image: { type: String, default: "/Hero-image.webp" },
     rating: { type: Number, default: 0 },
     reviews: { type: Number, default: 0 },
     price: { type: Number, required: true },
