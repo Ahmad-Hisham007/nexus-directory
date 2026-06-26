@@ -12,7 +12,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Nextus Directory",
+  title: "Nexus Directory",
   description: "Built with love",
 };
 

@@ -2,6 +2,15 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  async redirects() {
+    return [
+      {
+        source: "/services",
+        destination: "/explore",
+        permanent: true, // This tells search engines this is a permanent move
+      },
+    ];
+  },
   images: {
     dangerouslyAllowSVG: true,
     contentDispositionType: "attachment",

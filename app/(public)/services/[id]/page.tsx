@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Image from "next/image";
 import {
   FiStar,
@@ -5,10 +6,11 @@ import {
   FiCheckCircle,
   FiMessageSquare,
 } from "react-icons/fi";
-import { servicesData } from "@/lib/data";
 
 import { notFound } from "next/navigation";
 import ServiceCard from "@/Components/ServiceLoop/ServiceLoop";
+import { dbConnect } from "@/lib/dbConnect";
+import Service from "@/models/Service";
 
 export default async function ServiceDetailsPage({
   params,
@@ -17,18 +19,41 @@ export default async function ServiceDetailsPage({
 }) {
   // Await params in Next.js App Router
   const { id } = await params;
+  await dbConnect();
 
-  // Find the specific service using the static data
-  const service = servicesData.find((s) => s.id.toString() === id);
+  const serviceDoc = (await Service.findById(id)
+    .populate("author", "name image")
+    .populate("category", "name")
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .lean()) as any;
 
-  if (!service) {
+  if (!serviceDoc) {
     notFound();
   }
 
-  // Get related items (same category, exclude current)
-  const relatedServices = servicesData
-    .filter((s) => s.category === service.category && s.id !== service.id)
-    .slice(0, 3);
+  const service = {
+    ...serviceDoc,
+    id: serviceDoc._id.toString(),
+    author: serviceDoc.author?.name || "Unknown Author",
+    authorImage: serviceDoc.author?.image || "/Hero-image.webp",
+    category: serviceDoc.category?.name || "Uncategorized",
+  };
+  const relatedDocs = await Service.find({
+    category: serviceDoc.category._id,
+    _id: { $ne: id },
+  })
+    .populate("author", "name image")
+    .populate("category", "name")
+    .limit(3)
+    .lean();
+
+  const relatedServices = relatedDocs.map((doc: any) => ({
+    ...doc,
+    id: doc._id.toString(),
+    author: doc.author?.name || "Unknown Author",
+    category: doc.category?.name || "Uncategorized",
+    image: doc.image || "/Hero-image.webp",
+  }));
 
   return (
     <div className="w-full bg-base-100 min-h-screen py-10 px-6">
