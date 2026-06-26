@@ -1,18 +1,14 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Figtree, Inter } from "next/font/google";
 import "./globals.css";
 import { ToasterProvider } from "@/Components/ToasterProvider";
 import SessionWrapper from "@/Components/SessionWrapper/SessionWrapper";
 import ThemeToggle from "@/Components/ThemeToggle";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const figtree = Figtree({ subsets: ["latin"], variable: "--font-sans" });
+const inter = Inter({
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  variable: "--font-inter", // CSS variable name
 });
 
 export const metadata: Metadata = {
@@ -28,7 +24,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${figtree.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col bg-base-100 text-base-content transition-colors duration-300">
         <ToasterProvider />

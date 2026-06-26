@@ -1,3 +1,4 @@
+import Link from "next/link";
 import {
   FiMonitor,
   FiPenTool,
@@ -29,9 +30,12 @@ const CategorySection = () => {
               Find the specific talent you need to accelerate your business.
             </p>
           </div>
-          <button className="btn btn-outline hidden md:flex">
+          <Link
+            href="/explore"
+            className="btn btn-outline hidden md:flex rounded-full"
+          >
             All Categories
-          </button>
+          </Link>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">

@@ -1,13 +1,14 @@
-// We will build these next:
 // import TrendingServices from "./_components/home/TrendingServices";
-// import WhyChooseUs from "./_components/home/WhyChooseUs";
-// import HowItWorks from "./_components/home/HowItWorks";
 // import CtaSection from "./_components/home/CtaSection";
 // import Footer from "./_components/home/Footer";
 
 import CategorySection from "./_components/CategorySection";
+import CtaSection from "./_components/CtaSection";
 import HeroSection from "./_components/HeroSection";
+import HowItWorks from "./_components/HowItWorks";
 import StatsSection from "./_components/StatsSection";
+import TrendingServices from "./_components/TrendingServices";
+import WhyChooseUs from "./_components/WhyChooseUs";
 
 export default function Home() {
   return (
@@ -17,13 +18,10 @@ export default function Home() {
       <HeroSection />
       <StatsSection />
       <CategorySection />
-
-      {/* <TrendingServices />
+      <TrendingServices />
       <WhyChooseUs />
       <HowItWorks />
       <CtaSection />
-      <Footer /> 
-      */}
     </main>
   );
 }

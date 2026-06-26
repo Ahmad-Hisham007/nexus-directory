@@ -5,14 +5,18 @@ import { FaFacebookF, FaGithub, FaLinkedinIn } from "react-icons/fa";
 const Footer = () => {
   return (
     <footer className="w-full bg-base-200 border-t border-base-300 pt-16 pb-8 px-6 transition-colors duration-300">
-      <div className="max-w-7xl grid grid-cols-4 mx-auto text-base-content">
-        <aside className="space-y-4 grid-cols-1">
-          <Image
-            src="/nexus-directory-logo.png"
-            alt="Nexus Directory"
-            width={150}
-            height={50}
-          />
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 footer text-base-content">
+        <aside className="max-w-xs space-y-4">
+          <Link href="/" className="flex items-center gap-2">
+            <Image
+              src="/nexus-directory-favico.png"
+              alt="Nexus Directory"
+              width={24}
+              height={24}
+              className="object-contain"
+            />
+            <span className="text-2xl font-semibold">NEXUS</span>
+          </Link>
           <p className="text-base-content/70 text-sm">
             Nexus Directory Ltd.
             <br />
