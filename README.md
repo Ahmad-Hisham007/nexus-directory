@@ -1,209 +1,99 @@
-# Next Login Page
+![Nexus Directory Logo](public/nexus-directory-logo.png)
 
-A modern, full-stack authentication template built with Next.js, TypeScript, MongoDB, and NextAuth.js. This project provides a complete user authentication system with both traditional email/password login and OAuth integration (Google, GitHub, LinkedIn).
+# Nexus Directory
 
-## Features
+Modern directory platform built with Next.js (App Router), React 19, Mongoose, and NextAuth.
 
-- **User Authentication**: Secure login and registration with email/password
-- **OAuth Integration**: Social login with Google, GitHub, and LinkedIn
-- **Dashboard**: Protected dashboard with sidebar navigation
-- **User Management**: User profiles, roles, and session management
-- **Responsive Design**: Mobile-first design using Tailwind CSS and DaisyUI
-- **Type Safety**: Full TypeScript support
-- **Database**: MongoDB with Mongoose ODM
-- **Form Handling**: React Hook Form with validation
-- **Notifications**: React Hot Toast for user feedback
-- **Modern UI**: Clean, professional interface with dark theme support
+**Overview**
 
-## Tech Stack
+- **Purpose:** Marketplace-style directory for professionals, agencies, and services.
+- **Tech stack:** Next.js (App Router), React 19, TypeScript, Tailwind CSS + DaisyUI, MongoDB (Mongoose), NextAuth, react-hot-toast.
 
-- **Frontend**: Next.js 16, React 19, TypeScript
-- **Styling**: Tailwind CSS, DaisyUI
-- **Authentication**: NextAuth.js v5
-- **Database**: MongoDB, Mongoose
-- **Forms**: React Hook Form
-- **Icons**: React Icons
-- **Notifications**: React Hot Toast
-- **Password Hashing**: bcryptjs
+**Quick Links**
 
-## Project Structure
+- **Layout:** [app/layout.tsx](app/layout.tsx#L1)
+- **Auth handler:** [auth.ts](auth.ts#L1)
+- **Next config:** [next.config.ts](next.config.ts#L1)
+- **Logo:** [public/nexus-directory-logo.png](public/nexus-directory-logo.png)
 
-```
-next-login-page/
-├── app/
-│   ├── api/
-│   │   ├── auth/[...nextauth]/route.ts    # NextAuth.js API route
-│   │   ├── register/route.ts              # User registration API
-│   │   └── test-db/route.ts               # Database connection test
-│   ├── dashboard/
-│   │   ├── _components/                   # Dashboard components
-│   │   ├── posts/                         # Posts management pages
-│   │   ├── profile/                       # User profile page
-│   │   ├── settings/                      # Settings page
-│   │   └── page.tsx                       # Dashboard home
-│   ├── login/
-│   │   ├── _components/                   # Login/signup components
-│   │   └── page.tsx                       # Login page
-│   ├── globals.css                        # Global styles
-│   ├── layout.tsx                         # Root layout
-│   └── page.tsx                           # Home page
-├── lib/
-│   └── dbConnect.ts                       # Database connection utility
-├── models/
-│   ├── User.ts                            # User model
-│   ├── Account.ts                         # NextAuth Account model
-│   └── Session.ts                         # NextAuth Session model
-├── Components/                            # Shared components
-├── auth.config.ts                         # NextAuth configuration
-├── auth.ts                                # NextAuth setup
-└── package.json
+**Key Features**
+
+- **Authentication:** NextAuth with Credentials and OAuth providers
+- **Data:** Mongoose models for `User`, `Service`, `Category`, etc.
+- **Styling:** Tailwind CSS + DaisyUI components and themes
+- **UX:** Toasts (`react-hot-toast`) and accessible forms (`react-hook-form`)
+
+**Prerequisites**
+
+- **Node:** 18 or newer
+- **Package manager:** npm or yarn
+- **Database:** MongoDB connection (Atlas recommended)
+
+**Local Quick Start**
+
+1. Install dependencies
+
+```bash
+npm install
 ```
 
-## Installation
+2. Create `.env.local` with the required variables
 
-1. **Clone the repository**:
+- `MONGODB_URI` — MongoDB connection string
+- `AUTH_SECRET` — NextAuth secret
+- `NEXTAUTH_URL` — App base URL (e.g. `http://localhost:3000`)
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` — Google OAuth
+- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` — GitHub OAuth
+- `LINKEDIN_CLIENT_ID`, `LINKEDIN_CLIENT_SECRET` — LinkedIn OAuth
+- `AUTH_TRUST_HOST` — optional
 
-   ```bash
-   git clone https://github.com/Ahmad-Hisham007/next-login-page.git
-   cd next-login-page
-   ```
+> Tip: Copy the existing `.env.local` in the repo and replace secrets. Never commit secrets to source control.
 
-2. **Install dependencies**:
+3. Run the app
 
-   ```bash
-   npm install
-   ```
-
-3. **Set up environment variables**:
-
-   Create a `.env.local` file in the root directory with the following variables:
-
-   ```env
-   # Database
-   MONGODB_URI=mongodb://localhost:27017/next-login-page
-
-   # NextAuth.js
-   AUTH_SECRET=your-secret-key-here
-   NEXTAUTH_URL=http://localhost:3000
-
-   # OAuth Providers
-   GOOGLE_CLIENT_ID=your-google-client-id
-   GOOGLE_CLIENT_SECRET=your-google-client-secret
-
-   GITHUB_CLIENT_ID=your-github-client-id
-   GITHUB_CLIENT_SECRET=your-github-client-secret
-
-   LINKEDIN_CLIENT_ID=your-linkedin-client-id
-   LINKEDIN_CLIENT_SECRET=your-linkedin-client-secret
-   ```
-
-   **Note**: For production, use a secure random string for `AUTH_SECRET`. You can generate one using:
-
-   ```bash
-   openssl rand -base64 32
-   ```
-
-4. **Set up MongoDB**:
-
-   Make sure MongoDB is running locally or use a cloud service like MongoDB Atlas. Update the `MONGODB_URI` accordingly.
-
-5. **Configure OAuth Apps**:
-   - **Google**: Create a project in [Google Cloud Console](https://console.cloud.google.com/), enable Google+ API, and create OAuth 2.0 credentials.
-   - **GitHub**: Go to [GitHub Developer Settings](https://github.com/settings/developers), create a new OAuth App.
-   - **LinkedIn**: Create an app in [LinkedIn Developer Network](https://developer.linkedin.com/).
-
-   Set the redirect URIs to: `http://localhost:3000/api/auth/callback/[provider]`
-
-## Usage
-
-1. **Start the development server**:
-
-   ```bash
-   npm run dev
-   ```
-
-2. **Open your browser** and navigate to `http://localhost:3000`
-
-3. **Register/Login**:
-   - Visit `/login` to create a new account or sign in
-   - Use email/password or social login options
-   - After successful authentication, you'll be redirected to the dashboard
-
-4. **Dashboard Features**:
-   - **Posts**: Manage your posts and categories
-   - **Profile**: View and edit your profile information
-   - **Settings**: Configure your account settings
-
-## API Endpoints
-
-### Authentication
-
-- `POST /api/auth/[...nextauth]` - NextAuth.js authentication routes
-- `POST /api/register` - User registration
-
-### Database
-
-- `GET /api/test-db` - Test database connection
-
-## User Model
-
-```typescript
-{
-  name: string;
-  phoneNumber: number;
-  email: string; // unique, required
-  emailVerified: Date | null;
-  image: string;
-  password: string; // hashed, not selected by default
-  role: string; // default: "user"
-}
+```bash
+npm run dev
 ```
 
-## Scripts
+Open `http://localhost:3000` in your browser.
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run start` - Start production server
-- `npm run lint` - Run ESLint
+**NPM Scripts**
 
-## Deployment
+- **dev:** `npm run dev` — Start development server
+- **build:** `npm run build` — Build for production
+- **start:** `npm run start` — Run production build
+- **lint:** `npm run lint` — Run ESLint
 
-### Vercel (Recommended)
+**Project Structure (high level)**
 
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Add environment variables in Vercel dashboard
-4. Deploy
+- **`app/`**: Next.js App Router routes, layouts, and page components
+- **`Components/`**: Reusable UI components (ThemeToggle, ToasterProvider, etc.)
+- **`models/`**: Mongoose models (`User`, `Service`, `Category`, `Account`, `Session`)
+- **`lib/`**: Helpers (`dbConnect.ts`, `data.ts`)
+- **`public/`**: Static assets (logo at `public/nexus-directory-logo.png`)
 
-### Other Platforms
+**Database & Seeding**
 
-Make sure to set all environment variables and ensure MongoDB connectivity.
+- Connection helper: `lib/dbConnect.ts` — centralizes Mongoose connection.
+- Seeding: `app/api/seed/route.ts` — endpoint available to populate sample data. Use only in development or protect it.
 
-## Contributing
+**Authentication**
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -am 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Submit a pull request
+- Config: `auth.config.ts` and `auth.ts` (handler)
+- Uses NextAuth with CredentialsProvider (bcrypt password check) and OAuth providers configured via environment variables.
 
-## Support
+**Deployment**
 
-If you found this template helpful, please consider:
+- Recommended: Vercel (supports Next.js App Router and server components). Configure environment variables in the Vercel dashboard.
 
-- Starring the repository
-- Sharing it with others
-- Checking out my portfolio: [LinkedIn](https://www.linkedin.com/in/ahmad-hisham007) | [Fiverr](https://www.fiverr.com/s/GzRj290)
+**Maintenance Tips**
 
-## Acknowledgments
+- Keep Node and Next versions aligned with your hosting environment; this repo uses Next.js 16 and React 19.
+- Replace open seeding endpoints with an admin-only guard or convert them to a local CLI `npm run seed` script.
+- Store secrets in your hosting provider or GitHub Secrets for CI; never commit `.env.local`.
 
-- [Next.js](https://nextjs.org/) - The React framework
-- [NextAuth.js](https://next-auth.js.org/) - Authentication library
-- [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS framework
-- [DaisyUI](https://daisyui.com/) - Component library for Tailwind CSS
-- [MongoDB](https://www.mongodb.com/) - NoSQL database
-- [Mongoose](https://mongoosejs.com/) - MongoDB ODM
-- [React Hook Form](https://react-hook-form.com/) - Form handling library
-- [React Icons](https://react-icons.github.io/react-icons/) - Icon library
-- [React Hot Toast](https://react-hot-toast.com/) - Notification library
-- [bcryptjs](https://www.npmjs.com/package/bcryptjs) - Password hashing library
+**Contributing**
+
+- Fork the repo, create a branch, implement changes, open a PR. Run `npm run lint` and include UI screenshots for visual changes.
+
+If you'd like, I can add a CI workflow or a guarded seed script next.
