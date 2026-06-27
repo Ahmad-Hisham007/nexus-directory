@@ -95,5 +95,3 @@ Open `http://localhost:3000` in your browser.
 **Contributing**
 
 - Fork the repo, create a branch, implement changes, open a PR. Run `npm run lint` and include UI screenshots for visual changes.
-
-If you'd like, I can add a CI workflow or a guarded seed script next.
